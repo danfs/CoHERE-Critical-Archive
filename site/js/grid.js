@@ -24,7 +24,7 @@ function($scope,$http, $sce, $routeParams, Data) {
 	   		});
 	   	});
 	   	//TODO - dangerous, remove!
-	   	var cols = ['#1f77b4','#ff7f0e','#2ca02c','#d62728','#9467bd','#8c564b'];
+	   	var cols = ['#1f77b4','#ff7f0e','#2ca02c','#d62728','#9467bd','#8c564b','#1f77b4','#ff7f0e','#2ca02c','#d62728','#9467bd','#8c564b'];
 	   	//console.log(cols);
 	   	//var tag_colours = [];
 	   	for (var i = 0; i < all_tags.length; i++) {
@@ -160,8 +160,11 @@ function($scope,$http, $sce, $routeParams, Data) {
 		      .data(nodes.filter(function(n) { return !n.children; }))
 		    .enter().append("text")
 		      .attr("class", "node")
+		      .attr("id", function(d){return String.fromCharCode(97 +  d.id)})
 		      .attr("dy", ".31em")
 		      .attr("cursor","pointer")
+
+		      ///last part of the transform is to test whether we are past the 180 mark to flip the text
 		      .attr("transform", function(d) { return "rotate(" + (d.x - 90) + ")translate(" + (d.y + 8) + ",0)" + (d.x < 180 ? "" : "rotate(180)"); })
 		      .style("text-anchor", function(d) { return d.x < 180 ? "start" : "end"; })
 		      .text(function(d) { return d.key; })
@@ -181,23 +184,38 @@ function($scope,$http, $sce, $routeParams, Data) {
 			//console.log(d.name);
 			var active_tags = ArrNoDupe(d.tags);
 			///make a dot for each node that has a matching tag
+			// var id = String.fromCharCode(97 +  d.id);
+			// console.log(id, d3.select("#"+id));
+			// d3.select("#"+id).attr("transform", function(d) { return "rotate(" + (d.x - 90) + ")translate(" + (d.y + 128) + ",0)" + (d.x < 180 ? "" : "rotate(180)"); })
+			// //console.log(d);	
 			node.each(function(nd){
 				//if(nd.name!=d.name){
+
 					var this_nodes_tags = ArrNoDupe(nd.tags);
 					var spacing=14;
 					var tag_count = 0;
 					active_tags.forEach(function(t){
 						this_nodes_tags.forEach(function(tn){
 							if(t==tn){//active_tags.indexOf(tn)!=-1){
-								var transf = "rotate(" + (nd.x - 92) + ")translate(" + (nd.y + 8 + (tag_count * spacing) ) + ",0)" + (nd.x < 180 ? "" : "rotate(180)");
-								svg.select("g").append("circle").attr("stroke-width","3").attr("fill","none").attr("stroke",tag_colours[tn]).attr("class", "tag_circle").attr("r",7).attr("transform", transf );//function(d) { if (d) return "rotate(" + (d.x - 90) + ")translate(" + (d.y + 8) + ",0)" + (d.x < 180 ? "" : "rotate(180)"); })
+								var transf = "rotate(" + (nd.x - 90) + ")translate(" + (nd.y + 8 + (tag_count * spacing) ) + ",0)" + (nd.x < 180 ? "" : "rotate(180)");
+								svg.select("g").append("circle").attr("stroke-width","3").attr("fill","none").attr("stroke",tag_colours[tn]).attr("class", "tag_circle").attr("r",spacing* 0.3).attr("transform", transf );//function(d) { if (d) return "rotate(" + (d.x - 90) + ")translate(" + (d.y + 8) + ",0)" + (d.x < 180 ? "" : "rotate(180)"); })
 
 								tag_count++;
 							}
 						});
 					});
+
+					var id = String.fromCharCode(97 +  nd.id);
+			console.log(id, d3.select("#"+id));
+			d3.select("#"+id).transition()
+				.duration(450)
+				.attr("transform", function(d) { return "rotate(" + (d.x - 90) + ")translate(" + (d.y + tag_count * spacing) + ",0)" + (d.x < 180 ? "" : "rotate(180)"); })
+		
 				//}
 			})
+
+
+			
 
 			//classed applies a c;ass
 		  node
@@ -223,7 +241,8 @@ function($scope,$http, $sce, $routeParams, Data) {
 
 		  node
 		      .classed("node--target", false)
-		      .classed("node--source", false);
+		      .classed("node--source", false)
+		      .attr("transform", function(d) { return "rotate(" + (d.x - 90) + ")translate(" + (d.y + 8) + ",0)" + (d.x < 180 ? "" : "rotate(180)"); });
 
 		  d3.selectAll(".tag_circle").remove();
 		}
