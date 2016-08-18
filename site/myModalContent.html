@@ -1,0 +1,10 @@
+<div style="position:relative">
+<img ng-src="images/big/{{main_image}}" style="position:absolute;left:-200px; width:1000px">
+<!-- <h2 ng-class="{'start' : stop, 'shift':go}"  id="caption" style="position:absolute; top:550px; color:orange;background-color:white; padding:10px">{{main_caption}}</h2> -->
+
+<h2 ng-repeat="i in captions track by $index" ng-style="{'top': 550 -((captions.length-$index)*50) }" ng-class="{'start' : i.stop, 'shift':i.go}"  id="caption" style="position:absolute;  color:orange;background-color:white; padding:10px">{{i.caption}}</h2>
+
+
+<div>
+
+	<!-- <div ng-class="{'faded':show_me, 'post_tag_container' : true}" > -->

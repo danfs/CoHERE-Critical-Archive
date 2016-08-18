@@ -1,0 +1,99 @@
+[
+  {
+    "name": "Crossing Borders in the Insular Middle Ages",
+    "size": 0,
+    "imports": [
+      "Plural Heritages of Istanbul: The Case of Land Walls",
+      "Loops, Layers, Lines",
+      "Turing Tape Music",
+      "data bus",
+      "Bloodaxe Books Archive Interfaces"
+    ]
+  },
+  {
+    "name": "Plural Heritages of Istanbul: The Case of Land Walls",
+    "size": 0,
+    "imports": [
+      "Crossing Borders in the Insular Middle Ages",
+      "Loops, Layers, Lines",
+      "Turing Tape Music",
+      "data bus",
+      "Bloodaxe Books Archive Interfaces"
+    ]
+  },
+  {
+    "name": "Unbound #2: Terra Nullius",
+    "size": 0,
+    "imports": [
+      "Unbound",
+      "Artistic Prototypes"
+    ]
+  },
+  {
+    "name": "Listening Through Making",
+    "size": 0,
+    "imports": []
+  },
+  {
+    "name": "Loops, Layers, Lines",
+    "size": 0,
+    "imports": [
+      "Crossing Borders in the Insular Middle Ages",
+      "Plural Heritages of Istanbul: The Case of Land Walls",
+      "Turing Tape Music",
+      "data bus",
+      "Bloodaxe Books Archive Interfaces"
+    ]
+  },
+  {
+    "name": "Unbound",
+    "size": 0,
+    "imports": [
+      "Unbound #2: Terra Nullius",
+      "Artistic Prototypes"
+    ]
+  },
+  {
+    "name": "Turing Tape Music",
+    "size": 0,
+    "imports": [
+      "Crossing Borders in the Insular Middle Ages",
+      "Plural Heritages of Istanbul: The Case of Land Walls",
+      "Loops, Layers, Lines",
+      "data bus",
+      "Bloodaxe Books Archive Interfaces"
+    ]
+  },
+  {
+    "name": "data bus",
+    "size": 0,
+    "imports": [
+      "Crossing Borders in the Insular Middle Ages",
+      "Plural Heritages of Istanbul: The Case of Land Walls",
+      "Loops, Layers, Lines",
+      "Turing Tape Music",
+      "Bloodaxe Books Archive Interfaces"
+    ]
+  },
+  {
+    "name": "Artistic Prototypes",
+    "size": 0,
+    "imports": [
+      "Unbound #2: Terra Nullius",
+      "Unbound",
+      "Bloodaxe Books Archive Interfaces"
+    ]
+  },
+  {
+    "name": "Bloodaxe Books Archive Interfaces",
+    "size": 0,
+    "imports": [
+      "Crossing Borders in the Insular Middle Ages",
+      "Plural Heritages of Istanbul: The Case of Land Walls",
+      "Loops, Layers, Lines",
+      "Turing Tape Music",
+      "data bus",
+      "Artistic Prototypes"
+    ]
+  }
+]

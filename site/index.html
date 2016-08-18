@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="angControl">
+
+<head>
+	<title>CoHERE Critical Archive</title>
+	<script src="./libs/jquery.min.js"></script>
+
+	 <link rel='stylesheet' type='text/css' href='stylesheet.css'/>	 
+
+	<script type="text/javascript" src="http://d3js.org/d3.v3.min.js"></script>
+
+ 	<script src="bower_components/angular/angular.js"></script>
+  	<script src="bower_components/angular-route/angular-route.js"></script>
+
+  	<link rel='stylesheet' type='text/css' href='bower_components/bootstrap/dist/css/bootstrap.min.css'/>	
+	<script type="text/javascript" src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script> 
+
+	<!-- angular bootstrap ui -->
+	<link rel='stylesheet' type='text/css' href='bower_components/angular-bootstrap/ui-bootstrap-csp.css'/>	
+	<script type="text/javascript" src="bower_components/angular-bootstrap/ui-bootstrap-tpls.js"></script> 
+
+	<!-- fee free to get rid of theses -->
+    <script src="./libs/packery.pkgd.min.js"></script>
+	<script src="./libs/draggabilly.pkgd.min.js"></script>
+    <script src="./libs/packery.js"></script>
+    <!-- fee free to get rid of theses -->
+
+
+    
+    <!-- don't get rid of these! -->
+    <script src="js/app.js"></script>
+    <script src="js/controller.js"></script>
+    <script src='js/grid.js'></script>
+
+    <script src='js/about.js'></script>	
+	<script src='js/grid-detail.js'></script>
+	
+</head>
+
+<body>
+	
+
+	<div id="container">
+		<div ng-view>
+			<!-- everything in here is controlled by angular -->
+		</div>
+	</div>
+</body>	
+</html>
+
+

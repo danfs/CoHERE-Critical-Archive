@@ -1,0 +1,10 @@
+<div id="modalContainer" style="position:relative">
+<img sbLoad="onImgLoad($event)" id="modalImage" ng-src="images/mkbig/{{main_image}}" style="position:absolute;left:-200px; width:1000px">
+<!-- <h2 ng-class="{'start' : stop, 'shift':go}"  id="caption" style="position:absolute; top:550px; color:orange;background-color:white; padding:10px">{{main_caption}}</h2> -->
+
+<h2 ng-repeat="i in captions track by $index" ng-style="{'bottom': 30 +((captions.length-$index)*50) }" ng-class="{'start' : i.stop, 'shift':i.go}"  id="caption" style="position:absolute;  color:orange;background-color:rgba(255,255,255,0.5);font-size:12pt !important; padding:10px">{{i.caption}}</h2>
+
+
+<div>
+
+	<!-- <div ng-class="{'faded':show_me, 'post_tag_container' : true}" > -->
