@@ -5,6 +5,7 @@ angControllers.controller('GridCtrl', ['$scope', '$http', '$sce','$routeParams',
 function($scope,$http, $sce, $routeParams, Data) {
 	var all_tags = [];
 	var tag_colours = {};
+	var cols;
 	Data.getDataAsync(function(results) {
 	   //
 
@@ -23,17 +24,28 @@ function($scope,$http, $sce, $routeParams, Data) {
 	   			};
 	   		});
 	   	});
+
+	 //   	var distances = [2.23, 2.39, 2.59, 2.77];
+
+	 //   	d3.selectAll('p')
+  // .data(distances)
+  // .text(String) // set the paragraph text to the data values
+
+
 	   	//TODO - dangerous, remove!
-	   	var cols = ['#1f77b4','#ff7f0e','#2ca02c','#d62728','#9467bd','#8c564b','#1f77b4','#ff7f0e','#2ca02c','#d62728','#9467bd','#8c564b'];
+	   	 cols = ['#1f77b4','#ff7f0e','#2ca02c','#d62728','#9467bd','#8c564b','#1f77b4','#ff7f0e','#2ca02c','#d62728','#9467bd','#8c564b'];
 	   	//console.log(cols);
+
+	   	
+	  
 	   	//var tag_colours = [];
 	   	for (var i = 0; i < all_tags.length; i++) {
 	   		//console.log(i,all_tags[i]);
 	   		tag_colours[all_tags[i]] = cols[i];
 	   		
 	   	};
-	   		
-	   	console.log(tag_colours);
+	   	
+	   	
 	   	$scope.tag_colours = tag_colours;
 	   	//console.log(all_tags);
 	   	//this is a nasty old hack - somehow my function for getting the d3 friendly json was introducing a cyclic object which breaks the json parser by casting it to a string and then back I get rid of the refeerences!
@@ -42,14 +54,9 @@ function($scope,$http, $sce, $routeParams, Data) {
 	   	
 	   	makeGraph(jsn);
 	});
-  	
-  	//if we wanted to make the d3 friendly json elsehwere and just import it - we'd use this funciton
- //    var URL ='data/example.json';
 
-	// $http.get(URL).success(function(data){
-		
-	// 	console.log("data",typeof data);
-	// });
+	
+  	
 	
 	function wp_json_to_d3_json(wp_json){
 		d3_json = [];
@@ -172,7 +179,14 @@ function($scope,$http, $sce, $routeParams, Data) {
 		      .on("click", clicked)
 		      .on("mouseout", mouseouted);
 		
-
+		  d3.select(".tag").selectAll("p")
+    		.data(all_tags)
+    		.enter()
+    		.append("p")
+			.style("color", function(d,i){  return cols[i] })
+    		.text(String)
+    		.on("mouseover", tagMouseOver)
+    		.on("mouseout", tagMouseOut);
 		//});
 		
 		//svg.select("g").append("circle").attr("r",15).attr("cx",100).attr("cy",100);
@@ -242,9 +256,26 @@ function($scope,$http, $sce, $routeParams, Data) {
 		  node
 		      .classed("node--target", false)
 		      .classed("node--source", false)
-		      .attr("transform", function(d) { return "rotate(" + (d.x - 90) + ")translate(" + (d.y + 8) + ",0)" + (d.x < 180 ? "" : "rotate(180)"); });
+		      .transition()
+				.duration(450)
+				.attr("transform", function(d) { return "rotate(" + (d.x - 90) + ")translate(" + (d.y + 8) + ",0)" + (d.x < 180 ? "" : "rotate(180)"); });
 
 		  d3.selectAll(".tag_circle").remove();
+		}
+
+		function tagMouseOver(t){
+			//console.log(t);
+			node.each(function(n) {
+			//	console.log(n.tags);
+				if(n.tags.indexOf(t)>-1){
+					console.log("found",t);
+					mouseovered(n);
+				}
+			});
+		}
+
+		function tagMouseOut(){
+			mouseouted();
 		}
 
 		d3.select(self.frameElement).style("height", diameter + "px");
