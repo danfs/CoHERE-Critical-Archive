@@ -33,7 +33,7 @@ function($scope,$http, $sce, $routeParams, Data) {
 
 
 	   	//TODO - dangerous, remove!
-	   	 cols = ['#1f77b4','#ff7f0e','#2ca02c','#d62728','#9467bd','#8c564b','#1f77b4','#ff7f0e','#2ca02c','#d62728','#9467bd','#8c564b'];
+	   	 cols = ['#1f77b4','#ff7f0e','#2ca02c','#d62728','#9467bd','#8c564b', "#ff9896","9467bd", "#c5b0d5", "#8c564b", "#c49c94", "#e377c2", "f7b6d2",  "#7f7f7f"];
 	   	//console.log(cols);
 
 	   	
@@ -84,6 +84,12 @@ function($scope,$http, $sce, $routeParams, Data) {
 								//console.log("match "+this_cat,k,l);
 								tags.push(this_cat);
 								if(imports.indexOf(other_post.title) == -1){
+
+									var an_obj = {
+										name: other_post.title,
+										tag: this_cat
+									}
+									//imports.push(an_obj);
 									imports.push(other_post.title);
 									
 								}
@@ -154,6 +160,8 @@ function($scope,$http, $sce, $routeParams, Data) {
 		  var nodes = cluster.nodes(packageHierarchy(myjson)),
 		      links = packageImports(nodes);
 
+		  console.log("links",links);
+
 		  link = link
 		      .data(bundle(links))
 		    .enter().append("path")
@@ -220,7 +228,7 @@ function($scope,$http, $sce, $routeParams, Data) {
 					});
 
 					var id = String.fromCharCode(97 +  nd.id);
-			console.log(id, d3.select("#"+id));
+			//console.log(id, d3.select("#"+id));
 			d3.select("#"+id).transition()
 				.duration(450)
 				.attr("transform", function(d) { return "rotate(" + (d.x - 90) + ")translate(" + (d.y + tag_count * spacing) + ",0)" + (d.x < 180 ? "" : "rotate(180)"); })
@@ -240,6 +248,7 @@ function($scope,$http, $sce, $routeParams, Data) {
 		  link
 		      .classed("link--target", function(l) { if (l.target === d) return l.source.source = true; })
 		      .classed("link--source", function(l) { if (l.source === d) return l.target.target = true; })
+		      //below is just to bring the right nodes to the frotn	
 		    .filter(function(l) { return l.target === d || l.source === d; })
 		      .each(function() { this.parentNode.appendChild(this); });
 
@@ -262,20 +271,63 @@ function($scope,$http, $sce, $routeParams, Data) {
 
 		  d3.selectAll(".tag_circle").remove();
 		}
+		function highlightLinks(tag){
+
+
+		}
 
 		function tagMouseOver(t){
-			//console.log(t);
-			node.each(function(n) {
-			//	console.log(n.tags);
-				if(n.tags.indexOf(t)>-1){
-					console.log("found",t);
-					mouseovered(n);
-				}
-			});
+
+
+		    link.style("stroke", function (l){ return getLinkTagHighlight(l, t)})
+		    	.filter(function(l){ return linkHasTag(l, t) })
+		    	.style("stroke-width", "2")
+		    	.each(function() { this.parentNode.appendChild(this); });
+
+		 
+		}
+		function getLinkTagHighlight(l, t){
+
+			if(linkHasTag(l, t)){
+				return tag_colours[t];
+			}
+			return "steelblue";
+
 		}
 
 		function tagMouseOut(){
-			mouseouted();
+			link.style("stroke", "steelblue")
+				.style("stroke-width", 1);
+		}
+		function linkHasTag(link, tag){
+			//console.log(node);
+			var has_tag = false;
+			//console.log(link[0]);
+			//must have tag both end to 
+			if(link.length===3){
+				var tag_one = nodeHasTag(link[0],tag);
+				var tag_two =nodeHasTag(link[2],tag);
+
+				if (tag_one && tag_two) has_tag = true;
+				//console.log(has_tag, link[0]);
+				if(tag_one){
+					console.log(tag);
+				}
+			}
+
+		
+			return has_tag;
+		}
+		function nodeHasTag(node, tag){
+			var has_tag = false;
+			node.tags.forEach(function(n){
+			//console.log(n, tag)
+				if(n===tag) {
+					has_tag = true;
+				}
+			});
+			return has_tag;
+			// console.log(node, tag,has_tag);
 		}
 
 		d3.select(self.frameElement).style("height", diameter + "px");
@@ -330,9 +382,12 @@ function($scope,$http, $sce, $routeParams, Data) {
 	  nodes.forEach(function(d) {
 	  	///if the object has imports
 	    if (d.imports) d.imports.forEach(function(i) {
+
 	      imports.push({source: map[d.name], target: map[i]});
 	    });
 	  });
+
+
 
 	  return imports;
 	}
