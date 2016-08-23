@@ -5,6 +5,10 @@ angControllers.controller('GridCtrl', ['$scope', '$http', '$sce','$routeParams',
 function($scope,$http, $sce, $routeParams, Data) {
 	var all_tags = [];
 	var tag_colours = {};
+
+	function get_tag_colours(tag){
+	   		return tag_colours[n % tag_colours.length];
+	}
 	var cols;
 	Data.getDataAsync(function(results) {
 	   //
@@ -25,13 +29,7 @@ function($scope,$http, $sce, $routeParams, Data) {
 	   		});
 	   	});
 
-	 //   	var distances = [2.23, 2.39, 2.59, 2.77];
-
-	 //   	d3.selectAll('p')
-  // .data(distances)
-  // .text(String) // set the paragraph text to the data values
-
-
+	
 	   	//TODO - dangerous, remove!
 	   	 cols = ['#1f77b4','#ff7f0e','#2ca02c','#d62728','#9467bd','#8c564b', "#ff9896","9467bd", "#c5b0d5", "#8c564b", "#c49c94", "#e377c2", "f7b6d2",  "#7f7f7f"];
 	   	//console.log(cols);
@@ -41,13 +39,14 @@ function($scope,$http, $sce, $routeParams, Data) {
 	   	//var tag_colours = [];
 	   	for (var i = 0; i < all_tags.length; i++) {
 	   		//console.log(i,all_tags[i]);
-	   		tag_colours[all_tags[i]] = cols[i];
+	   		tag_colours[all_tags[i]] = cols[i % all_tags.length];
 	   		
 	   	};
+
+	   	
 	   	
 	   	
 	   	$scope.tag_colours = tag_colours;
-	   	//console.log(all_tags);
 	   	//this is a nasty old hack - somehow my function for getting the d3 friendly json was introducing a cyclic object which breaks the json parser by casting it to a string and then back I get rid of the refeerences!
 	   	var str = JSON.stringify(d3_json);
 	   	var jsn = JSON.parse(str);
@@ -79,16 +78,14 @@ function($scope,$http, $sce, $routeParams, Data) {
 						if(this_cat =="sound") console.log("sound", this_post.title);
 						for (var l = 0; l < other_post.tags.length; l++) {
 							var that_cat = other_post.tags[l].title.trim().toLowerCase();
-							//if(this_cat =="sound") console.log(other_post.title+" "+this_cat +" "+that_cat+" "+k);
 							if(this_cat==that_cat){
-								//console.log("match "+this_cat,k,l);
 								tags.push(this_cat);
 								if(imports.indexOf(other_post.title) == -1){
-
-									var an_obj = {
-										name: other_post.title,
-										tag: this_cat
-									}
+									//somehow I want to use a structure like this to define kinds of connection
+									// var an_obj = {
+									// 	name: other_post.title,
+									// 	tag: this_cat
+									// }
 									//imports.push(an_obj);
 									imports.push(other_post.title);
 									
@@ -126,7 +123,7 @@ function($scope,$http, $sce, $routeParams, Data) {
 		*/
 		return d3_json;
 	} 	
-
+	//main function for making the vis - where the magic happens
 	function makeGraph(myjson){	
 			///directly from d3 example
 		var diameter = 960,
@@ -162,94 +159,87 @@ function($scope,$http, $sce, $routeParams, Data) {
 
 		  console.log("links",links);
 
-		  link = link
-		      .data(bundle(links))
-		    .enter().append("path")
-		      .each(function(d) { d.source = d[0], d.target = d[d.length - 1]; })
-		      .attr("class", "link")
-		      .attr("d", line);
+		link = link
+			.data(bundle(links))
+			.enter().append("path")
+			.each(function(d) { d.source = d[0], d.target = d[d.length - 1]; })
+			.attr("class", "link")
+			.attr("d", line);
 
 
 
-		  node = node
-		      .data(nodes.filter(function(n) { return !n.children; }))
-		    .enter().append("text")
-		      .attr("class", "node")
-		      .attr("id", function(d){return String.fromCharCode(97 +  d.id)})
-		      .attr("dy", ".31em")
-		      .attr("cursor","pointer")
-
-		      ///last part of the transform is to test whether we are past the 180 mark to flip the text
-		      .attr("transform", function(d) { return "rotate(" + (d.x - 90) + ")translate(" + (d.y + 8) + ",0)" + (d.x < 180 ? "" : "rotate(180)"); })
-		      .style("text-anchor", function(d) { return d.x < 180 ? "start" : "end"; })
-		      .text(function(d) { return d.key; })
-		      .on("mouseover", mouseovered)
-		      .on("click", clicked)
-		      .on("mouseout", mouseouted);
+		node = node
+			.data(nodes.filter(function(n) { return !n.children; }))
+			.enter().append("text")
+			.attr("class", "node")
+			.attr("id", function(d){return String.fromCharCode(97 +  d.id)})
+			.attr("dy", ".31em")
+			.attr("cursor","pointer")
+			///last part of the transform is to test whether we are past the 180 mark to flip the text
+			.attr("transform", function(d) { return "rotate(" + (d.x - 90) + ")translate(" + (d.y + 8) + ",0)" + (d.x < 180 ? "" : "rotate(180)"); })
+			.style("text-anchor", function(d) { return d.x < 180 ? "start" : "end"; })
+			.text(function(d) { return d.key; })
+			.on("mouseover", mouseovered)
+			.on("click", clicked)
+			.on("mouseout", mouseouted);
 		
-		  d3.select(".tag").selectAll("p")
-    		.data(all_tags)
-    		.enter()
-    		.append("p")
+		//my addition - adds colour coded tags with mouse interaction for highighting KINDS of connection
+		d3.select(".tag").selectAll("p")
+			.data(all_tags)
+			.enter()
+			.append("p")
 			.style("color", function(d,i){  return cols[i] })
-    		.text(String)
-    		.on("mouseover", tagMouseOver)
-    		.on("mouseout", tagMouseOut);
-		//});
-		
-		//svg.select("g").append("circle").attr("r",15).attr("cx",100).attr("cy",100);
+			.text(String)
+			.on("mouseover", tagMouseOver)
+			.on("mouseout", tagMouseOut);
+	
 		function clicked(d){			
 			window.location.href = '#/grid/'+d.id;
 		}
 
 		function mouseovered(d) {
 			//console.log(d.name);
+			//get a unique list of the tags from this node
 			var active_tags = ArrNoDupe(d.tags);
 			///make a dot for each node that has a matching tag
-			// var id = String.fromCharCode(97 +  d.id);
-			// console.log(id, d3.select("#"+id));
-			// d3.select("#"+id).attr("transform", function(d) { return "rotate(" + (d.x - 90) + ")translate(" + (d.y + 128) + ",0)" + (d.x < 180 ? "" : "rotate(180)"); })
-			// //console.log(d);	
 			node.each(function(nd){
-				//if(nd.name!=d.name){
-
-					var this_nodes_tags = ArrNoDupe(nd.tags);
-					var spacing=14;
-					var tag_count = 0;
-					active_tags.forEach(function(t){
-						this_nodes_tags.forEach(function(tn){
-							if(t==tn){//active_tags.indexOf(tn)!=-1){
-								var transf = "rotate(" + (nd.x - 90) + ")translate(" + (nd.y + 8 + (tag_count * spacing) ) + ",0)" + (nd.x < 180 ? "" : "rotate(180)");
-								svg.select("g").append("circle").attr("stroke-width","3").attr("fill","none").attr("stroke",tag_colours[tn]).attr("class", "tag_circle").attr("r",spacing* 0.3).attr("transform", transf );//function(d) { if (d) return "rotate(" + (d.x - 90) + ")translate(" + (d.y + 8) + ",0)" + (d.x < 180 ? "" : "rotate(180)"); })
-
-								tag_count++;
-							}
-						});
+				var this_nodes_tags = ArrNoDupe(nd.tags);
+				var spacing=14;
+				var tag_count = 0;
+				active_tags.forEach(function(t){
+					this_nodes_tags.forEach(function(tn){
+						//if this node has a tag matching the rolled over tag then....
+						if(t==tn){
+							//make the transform and add a circle at distance = spacing * tag_count 
+							var transf = "rotate(" + (nd.x - 90) + ")translate(" + (nd.y + 8 + (tag_count * spacing) ) + ",0)" + (nd.x < 180 ? "" : "rotate(180)");
+							svg.select("g").append("circle").attr("stroke-width","3").attr("fill","none").attr("stroke",tag_colours[tn]).attr("class", "tag_circle").attr("r",spacing* 0.3).attr("transform", transf );//function(d) { if (d) return "rotate(" + (d.x - 90) + ")translate(" + (d.y + 8) + ",0)" + (d.x < 180 ? "" : "rotate(180)"); })
+							//increment for the next circle
+							tag_count++;
+						}
 					});
-
-					var id = String.fromCharCode(97 +  nd.id);
-			//console.log(id, d3.select("#"+id));
-			d3.select("#"+id).transition()
-				.duration(450)
-				.attr("transform", function(d) { return "rotate(" + (d.x - 90) + ")translate(" + (d.y + tag_count * spacing) + ",0)" + (d.x < 180 ? "" : "rotate(180)"); })
-		
-				//}
+				});
+				//you can't have numeric IDs in d3
+				var id = String.fromCharCode(97 +  nd.id);
+				d3.select("#"+id).transition()
+					.duration(450)
+					.attr("transform", function(d) { return "rotate(" + (d.x - 90) + ")translate(" + (d.y + tag_count * spacing) + ",0)" + (d.x < 180 ? "" : "rotate(180)"); })
 			})
 
 
 			
 
-			//classed applies a c;ass
+			//from the example  - turn off all the nodes' flags identifying them as targets or sources for the links
 		  node
 		      .each(function(n) { n.target = n.source = false; });
 
 
-		  ///in the below I'm assuming that l is an iterator 
+		  ///I can't work out why l.source.source rather than just l.source
 		  link
 		      .classed("link--target", function(l) { if (l.target === d) return l.source.source = true; })
 		      .classed("link--source", function(l) { if (l.source === d) return l.target.target = true; })
-		      //below is just to bring the right nodes to the frotn	
+		      //below is just to bring the right nodes to the front - filter applies itself on anything further on in the method chain	
 		    .filter(function(l) { return l.target === d || l.source === d; })
+		    ///this.parentNode.appendChild(this) just takes the child off and sticks it back on again bringing it to the front
 		      .each(function() { this.parentNode.appendChild(this); });
 
 		  node
@@ -258,36 +248,36 @@ function($scope,$http, $sce, $routeParams, Data) {
 		}
 
 		function mouseouted(d) {
-		  link
-		      .classed("link--target", false)
-		      .classed("link--source", false);
+			link
+				.classed("link--target", false)
+				.classed("link--source", false);
 
-		  node
-		      .classed("node--target", false)
-		      .classed("node--source", false)
-		      .transition()
+			node
+				.classed("node--target", false)
+				.classed("node--source", false)
+				//transition back to original position
+				.transition()
 				.duration(450)
 				.attr("transform", function(d) { return "rotate(" + (d.x - 90) + ")translate(" + (d.y + 8) + ",0)" + (d.x < 180 ? "" : "rotate(180)"); });
 
-		  d3.selectAll(".tag_circle").remove();
+			///get rid of all the little circles
+			d3.selectAll(".tag_circle").remove();
 		}
-		function highlightLinks(tag){
-
-
-		}
+		
 
 		function tagMouseOver(t){
-
-
+			//for each link check if the node at BOTH ends contains the tag you're interested in and return the colour
 		    link.style("stroke", function (l){ return getLinkTagHighlight(l, t)})
+		    	//filter for having tags and apply a thicker stroke to everything afterwards
 		    	.filter(function(l){ return linkHasTag(l, t) })
 		    	.style("stroke-width", "2")
+		    	.style("stroke-opacity", "1")
 		    	.each(function() { this.parentNode.appendChild(this); });
 
 		 
 		}
 		function getLinkTagHighlight(l, t){
-
+			//if the link connects to nodes having a tag then return the mapped colour otherwise return default
 			if(linkHasTag(l, t)){
 				return tag_colours[t];
 			}
@@ -297,19 +287,18 @@ function($scope,$http, $sce, $routeParams, Data) {
 
 		function tagMouseOut(){
 			link.style("stroke", "steelblue")
-				.style("stroke-width", 1);
+				.style("stroke-width", 1)
+				.style("stroke-opacity", 0.4);
 		}
 		function linkHasTag(link, tag){
-			//console.log(node);
 			var has_tag = false;
-			//console.log(link[0]);
-			//must have tag both end to 
+			//must have tag both end to return true
 			if(link.length===3){
+				//the links are arrays with 3 elements the first and last are the target and source nodes, the middle is maybe a notional parent?
 				var tag_one = nodeHasTag(link[0],tag);
 				var tag_two =nodeHasTag(link[2],tag);
 
 				if (tag_one && tag_two) has_tag = true;
-				//console.log(has_tag, link[0]);
 				if(tag_one){
 					console.log(tag);
 				}
@@ -321,15 +310,14 @@ function($scope,$http, $sce, $routeParams, Data) {
 		function nodeHasTag(node, tag){
 			var has_tag = false;
 			node.tags.forEach(function(n){
-			//console.log(n, tag)
 				if(n===tag) {
 					has_tag = true;
 				}
 			});
 			return has_tag;
-			// console.log(node, tag,has_tag);
 		}
 
+		///dunno what this is for -matching diameter of svg to height of screen? 
 		d3.select(self.frameElement).style("height", diameter + "px");
 
 		// Lazily construct the package hierarchy from class names.

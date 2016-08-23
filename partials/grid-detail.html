@@ -1,2 +1,6 @@
 <h1>Grid detail for # {{project.id }}, {{project.title}} </h1>
 
+<div ng-repeat = "i in project.tags"> {{i.title}} </div>
+<p id="content">{{content}}</p>
+<img ng-src="{{project.attachments[0].url}}" alt="no image"/>
+
