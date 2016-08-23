@@ -31,6 +31,19 @@
   pointer-events: none;
 }
 
+.link--tagged {
+ /* .style("stroke-width", "2")
+          .style("stroke-opacity", "1")*/
+  stroke-opacity: 1;
+  stroke-width: 2px;
+}
+.link--untagged {
+ /* .style("stroke-width", "2")
+          .style("stroke-opacity", "1")*/
+  stroke-opacity: 0.4;
+  stroke-width: 1px;
+}
+
 .node:hover,
 .node--source,
 .node--target {

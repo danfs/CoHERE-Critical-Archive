@@ -126,7 +126,7 @@ function($scope,$http, $sce, $routeParams, Data) {
 	//main function for making the vis - where the magic happens
 	function makeGraph(myjson){	
 			///directly from d3 example
-		var diameter = 960,
+		var diameter = 700,
 		    radius = diameter / 2,
 		    innerRadius = radius - 120;
 
@@ -270,8 +270,7 @@ function($scope,$http, $sce, $routeParams, Data) {
 		    link.style("stroke", function (l){ return getLinkTagHighlight(l, t)})
 		    	//filter for having tags and apply a thicker stroke to everything afterwards
 		    	.filter(function(l){ return linkHasTag(l, t) })
-		    	.style("stroke-width", "2")
-		    	.style("stroke-opacity", "1")
+				.classed("link--tagged", true)
 		    	.each(function() { this.parentNode.appendChild(this); });
 
 		 
@@ -287,8 +286,9 @@ function($scope,$http, $sce, $routeParams, Data) {
 
 		function tagMouseOut(){
 			link.style("stroke", "steelblue")
-				.style("stroke-width", 1)
-				.style("stroke-opacity", 0.4);
+				.classed("link--tagged", false)
+				// .style("stroke-width", 1)
+				// .style("stroke-opacity", 0.4);
 		}
 		function linkHasTag(link, tag){
 			var has_tag = false;
