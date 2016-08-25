@@ -3,161 +3,208 @@ angControllers.controller('GridCtrl', ['$scope', '$http', '$sce','$routeParams',
 // function GridCtrl($scope,$http, $sce, $routeParams, Data) {
 	
 function($scope,$http, $sce, $routeParams, Data) {
-	var all_tags = [];
-	var tag_colours = {};
 
-	function get_tag_colours(tag){
-	   		return tag_colours[n % tag_colours.length];
-	}
-	var cols;
 	Data.getDataAsync(function(results) {
-	   //
-
-	    console.log("results",results);	
-	    $scope.projects = results.posts;
-	   	var d3_json = wp_json_to_d3_json(results.posts);
-	   	$scope.d3_json = d3_json;
-
-	   
-	   console.log(d3_json);
-	   	d3_json.forEach(function(d){
-	   		d.tags.forEach(function(t){
-	   		//	console.log(t);
-	   			if (all_tags.indexOf(t)===-1) {
-	   				all_tags.push(t);
-	   			};
-	   		});
-	   	});
-
 	
-	   	//TODO - dangerous, remove!
-	   	 cols = ['#1f77b4','#ff7f0e','#2ca02c','#d62728','#9467bd','#8c564b', "#ff9896","9467bd", "#c5b0d5", "#8c564b", "#c49c94", "#e377c2", "f7b6d2",  "#7f7f7f"];
-	   	//console.log(cols);
+		var d3_json = wp_json_to_d3_json(results.posts);
+		$scope.d3_json = d3_json;
 
-	   	
-	  
-	   	//var tag_colours = [];
-	   	for (var i = 0; i < all_tags.length; i++) {
-	   		//console.log(i,all_tags[i]);
-	   		tag_colours[all_tags[i]] = cols[i % all_tags.length];
-	   		
-	   	};
 
-	   	
-	   	
-	   	
-	   	$scope.tag_colours = tag_colours;
-	   	//this is a nasty old hack - somehow my function for getting the d3 friendly json was introducing a cyclic object which breaks the json parser by casting it to a string and then back I get rid of the refeerences!
-	   	var str = JSON.stringify(d3_json);
-	   	var jsn = JSON.parse(str);
-	   	
-	   	makeGraph(jsn);
+		for (var i in d3_json.tags){
+			d3_json.tags[i].colour = getRandomColor(); 		
+		}
+
+		makeGraph(d3_json);
 	});
 
 	
-  	
+  	function getRandomColor() {
+		var letters = '0123456789ABCDEF';
+		var color = '#';
+		for (var i = 0; i < 6; i++ ) {
+			color += letters[Math.floor(Math.random() * 16)];
+		}
+		return color;
+	}
 	
 	function wp_json_to_d3_json(wp_json){
-		d3_json = [];
+		d3JSON = {};
+
+		var nodes = {};
+		var links = [];
+		var tags = {};
+		
+
+		function newNode(post){
+
+			// "nodes":{
+			// 		key	:{
+			// 			title:"title"
+			// 			key:ID
+			// 			parent:Object
+			// 			children:Array[]
+			// 		},
+			var key = (post.title_plain === undefined) ? "" : post.title_plain; 
+
+			//only add unique nodes
+			if(!(key in nodes)){
+				//create a blank node
+				var node = nodes[key] = {key: "", children: []};
+				
+				if (key !== "") { //it's not the root node
+					node.parent = newNode("");//defalt only one depth
+					node.parent.children.push(node);
+					node.key = post.title_plain;
+					node.id = post.id;
+					node.title = post.title_plain;
+					node.tags = [];
+
+					nodes[key] = node;
+				}
+			}
+			
+			//return new node or existing node if it already exists
+			return nodes[key];
+		}
+
+		function newLink(source,target,tag){
+
+			// "links":[
+			// 		{
+			// 			"source": nodeID,
+			// 			"target": nodeID,
+			// 			"tag": tagID
+			// 		},
+			// 		...
+
+			var exists = links.find(function( link ) {
+				return link.source === nodes[source] && link.target === nodes[target] && link.tag === tags[tag];
+			});
+
+			if(!exists){
+				links.push({"source":source,"target":target,"tag":tag});
+				tag.LinkCount += 1;
+				if (source.tags.indexOf(tag) == -1) {
+					source.tags.push(tag);
+				}
+
+				if (target.tags.indexOf(tag) == -1) {
+					target.tags.push(tag);
+				}   
+
+
+				return links.length-1;
+			}else{
+				return exists;
+			}			
+		}
+
+		function newTag(postTag){
+
+			// "tags":[
+			// 		{
+			// 			"tagID": tagID,
+			// 			"catogary": catogary,
+			// 			"value": value,
+			//			"LinkCount":n
+			// 		},
+			// 		...
+
+			//only add unique tags
+			if(!(postTag.slug in tags)){
+				var tag = {};
+				tag.id = postTag.id;
+				tag.colour = getRandomColor();
+				tag.LinkCount = 0;
+
+				var t = postTag.title.split(":");
+				if (t.length>1){
+					tag.catogary = t[0];
+					tag.value = t[1];
+				}else{
+					tag.catogary = 'null';
+					tag.value = t[0];
+				}
+
+				tags[postTag.slug] = tag;
+			}
+
+			return tags[postTag.slug];
+		}
+
 
 		//for all the posts
 		for (var i = 0; i < wp_json.length; i++) {
 			var this_post = wp_json[i];
-			//var new_node={};
-			//lets compare to all the other posts
-			var imports = [];
-			var tags = [];
-			for (var j = 0; j < wp_json.length; j++) {
-				var other_post = wp_json[j];
-				//don't compare a post with itself
-				if(i!=j){
 
-					//lets use tags as an example
-					for (var k = 0; k < this_post.tags.length; k++) {
-						var this_cat = this_post.tags[k].title.trim().toLowerCase();
-						if(this_cat =="sound") console.log("sound", this_post.title);
+			var sourceNode = newNode(this_post);
+
+			for (var k = 0; k < this_post.tags.length; k++) {
+				
+				var tagIndex = newTag(this_post.tags[k]);
+		
+				for (var j = 0; j < wp_json.length; j++) {
+					
+					//don't compare a post with itself
+					if(i!=j){
+						var other_post = wp_json[j];
 						for (var l = 0; l < other_post.tags.length; l++) {
+							var this_cat = this_post.tags[k].title.trim().toLowerCase();
 							var that_cat = other_post.tags[l].title.trim().toLowerCase();
 							if(this_cat==that_cat){
-								tags.push(this_cat);
-								if(imports.indexOf(other_post.title) == -1){
-									//somehow I want to use a structure like this to define kinds of connection
-									// var an_obj = {
-									// 	name: other_post.title,
-									// 	tag: this_cat
-									// }
-									//imports.push(an_obj);
-									imports.push(other_post.title);
-									
-								}
+								var targetNode = newNode(other_post);
+								newLink(sourceNode,targetNode,tagIndex);
 							}
-						};
-					};
-
+						}
+					}
 				}
 			}
-		
-			
-			var new_node = {
-				name:this_post.title,
-				size:0,
-				imports:imports,
-				id:this_post.id,
-				tags:tags
-			}
-			d3_json.push(new_node);
+		}
+
+		d3JSON = {
+			"nodes":nodes,
+			"links":links,
+			"tags":tags
 		};
-		/*
-			each object should be of the format
-			{
-		    "name": "flare.analytics.cluster.CommunityStructure",
-		    "size": 3812,
-		    "imports": [
-		      "flare.analytics.cluster.HierarchicalCluster",
-		      "flare.animate.Transitioner",
-		      "flare.vis.data.DataList",
-		      "flare.analytics.cluster.MergeEdge",
-		      "flare.util.math.IMatrix"
-		    	]
-  			}
-		*/
-		return d3_json;
+
+		return d3JSON;
 	} 	
 	//main function for making the vis - where the magic happens
 	function makeGraph(myjson){	
 			///directly from d3 example
 		var diameter = 700,
-		    radius = diameter / 2,
-		    innerRadius = radius - 120;
+			radius = diameter / 2,
+			innerRadius = radius - 120;
 
 		 var cluster = d3.layout.cluster()
-		    .size([360, innerRadius])
-		    .sort(null)
-		    .value(function(d) { return d.size; });
+			.size([360, innerRadius])
+			.sort(null)
+			.value(function(d) { return d.size; });
 
 		var bundle = d3.layout.bundle();
 
 		var line = d3.svg.line.radial()
-		    .interpolate("bundle")
-		    .tension(.85)
-		    .radius(function(d) { return d.y; })
-		    .angle(function(d) { return d.x / 180 * Math.PI; });
+			.interpolate("bundle")
+			.tension(.85)
+			.radius(function(d) { return d.y; })
+			.angle(function(d) { return d.x / 180 * Math.PI; });
 
 		var svg = d3.select("#vis_container").append("svg")
-		    .attr("width", diameter)
-		    .attr("height", diameter)
-		  .append("g")
-		    .attr("transform", "translate(" + radius + "," + radius + ")");
+			.attr("width", diameter)
+			.attr("height", diameter)
+			.append("g")
+			.attr("transform", "translate(" + radius + "," + radius + ")");
 
 		var link = svg.append("g").selectAll(".link"),
-		    node = svg.append("g").attr("class","all_nodes").selectAll(".node");
+			node = svg.append("g").attr("class","all_nodes").selectAll(".node"),
+			tag = d3.select(".tag").selectAll("p");
 
 
 		  ////here's where we link the json with the D3 objects
-		  var nodes = cluster.nodes(packageHierarchy(myjson)),
-		      links = packageImports(nodes);
+		var nodes = cluster.nodes(myjson.nodes[""]),
+		 	links = myjson.links,
+		 	tags = Object.keys(myjson.tags).map(function (key) {return myjson.tags[key]});
 
-		  console.log("links",links);
 
 		link = link
 			.data(bundle(links))
@@ -165,7 +212,6 @@ function($scope,$http, $sce, $routeParams, Data) {
 			.each(function(d) { d.source = d[0], d.target = d[d.length - 1]; })
 			.attr("class", "link")
 			.attr("d", line);
-
 
 
 		node = node
@@ -184,26 +230,37 @@ function($scope,$http, $sce, $routeParams, Data) {
 			.on("mouseout", mouseouted);
 		
 		//my addition - adds colour coded tags with mouse interaction for highighting KINDS of connection
-		d3.select(".tag").selectAll("p")
-			.data(all_tags)
+		tag = tag
+			.data(tags)
 			.enter()
 			.append("p")
-			.style("color", function(d,i){  return cols[i] })
-			.text(String)
-			.on("mouseover", tagMouseOver)
-			.on("mouseout", tagMouseOut);
+			.style("color", function(d){  return d.colour })
+			.text(function(d){  return d.catogary+" : "+d.value+" ["+d.LinkCount/2+"]" })
+			.on("mouseover", function (d){
+				console.log(d);
+				//for each link check if the node at BOTH ends contains the tag you're interested in and return the colour
+		    	link.style("stroke", function (l){ return getLinkTagHighlight(l, d)})
+		    	//filter for having tags and apply a thicker stroke to everything afterwards
+		    	.filter(function(l){ return linkHasTag(l, d) })
+				.classed("link--tagged", true)
+		    	.each(function() { this.parentNode.appendChild(this); });
+			})
+			.on("mouseout", function (d){
+				link.style("stroke", "steelblue")
+				.classed("link--tagged", false);
+			});	
+		
 	
 		function clicked(d){			
 			window.location.href = '#/grid/'+d.id;
 		}
 
 		function mouseovered(d) {
-			//console.log(d.name);
 			//get a unique list of the tags from this node
-			var active_tags = ArrNoDupe(d.tags);
+			var active_tags = d.tags;
 			///make a dot for each node that has a matching tag
 			node.each(function(nd){
-				var this_nodes_tags = ArrNoDupe(nd.tags);
+				var this_nodes_tags = nd.tags;
 				var spacing=14;
 				var tag_count = 0;
 				active_tags.forEach(function(t){
@@ -212,7 +269,7 @@ function($scope,$http, $sce, $routeParams, Data) {
 						if(t==tn){
 							//make the transform and add a circle at distance = spacing * tag_count 
 							var transf = "rotate(" + (nd.x - 90) + ")translate(" + (nd.y + 8 + (tag_count * spacing) ) + ",0)" + (nd.x < 180 ? "" : "rotate(180)");
-							svg.select("g").append("circle").attr("stroke-width","3").attr("fill","none").attr("stroke",tag_colours[tn]).attr("class", "tag_circle").attr("r",spacing* 0.3).attr("transform", transf );//function(d) { if (d) return "rotate(" + (d.x - 90) + ")translate(" + (d.y + 8) + ",0)" + (d.x < 180 ? "" : "rotate(180)"); })
+							svg.select("g").append("circle").attr("stroke-width","3").attr("fill","none").attr("stroke",tn.colour).attr("class", "tag_circle").attr("r",spacing* 0.3).attr("transform", transf );//function(d) { if (d) return "rotate(" + (d.x - 90) + ")translate(" + (d.y + 8) + ",0)" + (d.x < 180 ? "" : "rotate(180)"); })
 							//increment for the next circle
 							tag_count++;
 						}
@@ -223,10 +280,7 @@ function($scope,$http, $sce, $routeParams, Data) {
 				d3.select("#"+id).transition()
 					.duration(450)
 					.attr("transform", function(d) { return "rotate(" + (d.x - 90) + ")translate(" + (d.y + tag_count * spacing) + ",0)" + (d.x < 180 ? "" : "rotate(180)"); })
-			})
-
-
-			
+			});
 
 			//from the example  - turn off all the nodes' flags identifying them as targets or sources for the links
 		  node
@@ -264,47 +318,23 @@ function($scope,$http, $sce, $routeParams, Data) {
 			d3.selectAll(".tag_circle").remove();
 		}
 		
-
-		function tagMouseOver(t){
-			//for each link check if the node at BOTH ends contains the tag you're interested in and return the colour
-		    link.style("stroke", function (l){ return getLinkTagHighlight(l, t)})
-		    	//filter for having tags and apply a thicker stroke to everything afterwards
-		    	.filter(function(l){ return linkHasTag(l, t) })
-				.classed("link--tagged", true)
-		    	.each(function() { this.parentNode.appendChild(this); });
-
-		 
-		}
 		function getLinkTagHighlight(l, t){
 			//if the link connects to nodes having a tag then return the mapped colour otherwise return default
 			if(linkHasTag(l, t)){
-				return tag_colours[t];
+				return t.colour;
 			}
 			return "steelblue";
 
 		}
 
-		function tagMouseOut(){
-			link.style("stroke", "steelblue")
-				.classed("link--tagged", false)
-				// .style("stroke-width", 1)
-				// .style("stroke-opacity", 0.4);
-		}
 		function linkHasTag(link, tag){
 			var has_tag = false;
 			//must have tag both end to return true
-			if(link.length===3){
-				//the links are arrays with 3 elements the first and last are the target and source nodes, the middle is maybe a notional parent?
-				var tag_one = nodeHasTag(link[0],tag);
-				var tag_two =nodeHasTag(link[2],tag);
+			var source = nodeHasTag(link.source,tag);
+			var target = nodeHasTag(link.target,tag);
 
-				if (tag_one && tag_two) has_tag = true;
-				if(tag_one){
-					console.log(tag);
-				}
-			}
-
-		
+			if (source && target) has_tag = true;
+	
 			return has_tag;
 		}
 		function nodeHasTag(node, tag){
@@ -320,65 +350,5 @@ function($scope,$http, $sce, $routeParams, Data) {
 		///dunno what this is for -matching diameter of svg to height of screen? 
 		d3.select(self.frameElement).style("height", diameter + "px");
 
-		// Lazily construct the package hierarchy from class names.
-		function packageHierarchy(classes) {
-		  var map = {};
-
-		  function find(name, data) {
-		    var node = map[name], i;
-		    if (!node) {
-		      node = map[name] = data || {name: name, children: []};
-		      if (name.length) {
-		        node.parent = find(name.substring(0, i = name.lastIndexOf(".")));
-		        node.parent.children.push(node);
-		        node.key = name.substring(i + 1);
-		      }
-		    }
-		    return node;
-		  }
-
-		  classes.forEach(function(d) {
-		    find(d.name, d);
-		  });
-			// console.log(map);
-		 //  console.log(map[""]);
-		  return map[""];
-		}
 	}
-	function ArrNoDupe(a) {
-	    var temp = {};
-	    for (var i = 0; i < a.length; i++)
-	        temp[a[i]] = true;
-	    var r = [];
-	    for (var k in temp)
-	        r.push(k);
-	    return r;
-	}
-
-	// Return a list of imports for the given array of nodes.
-	function packageImports(nodes) {
-	  var map = {},
-	      imports = [];
-
-	  // Compute a map from name to node.
-	  nodes.forEach(function(d) {
-	  	//console.log(d);
-	    map[d.name] = d;
-	  });
-
-	  // For each import, construct a link from the source to target node.
-	  nodes.forEach(function(d) {
-	  	///if the object has imports
-	    if (d.imports) d.imports.forEach(function(i) {
-
-	      imports.push({source: map[d.name], target: map[i]});
-	    });
-	  });
-
-
-
-	  return imports;
-	}
-
-
 }]);
