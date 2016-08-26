@@ -247,7 +247,9 @@ function($scope,$http, $sce, $routeParams, Data) {
 		
 		//my addition - adds colour coded tags with mouse interaction for highighting KINDS of connection
 		tag = tag
-			.data(tags)
+			.data(tags
+				.filter(function(d) { return d.LinkCount>0; })
+				.sort(function(a, b) { return d3.ascending(b.catogary, a.catogary) || d3.descending(parseFloat(a.LinkCount), parseFloat(b.LinkCount)) }))
 			.enter()
 			.append("p")
 			.style("color", function(d){  return d.colour })
