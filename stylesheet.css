@@ -18,6 +18,7 @@
 .node {
   font: 300 11px "Helvetica Neue", Helvetica, Arial, sans-serif;
   fill: #bbb;
+  overflow: visible !important;
 }
 
 .node:hover {

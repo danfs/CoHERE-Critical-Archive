@@ -185,7 +185,7 @@ function($scope,$http, $sce, $routeParams, Data) {
 
 		var line = d3.svg.line.radial()
 			.interpolate("bundle")
-			.tension(.85)
+			.tension(.55)
 			.radius(function(d) { return d.y; })
 			.angle(function(d) { return d.x / 180 * Math.PI; });
 
@@ -215,19 +215,35 @@ function($scope,$http, $sce, $routeParams, Data) {
 
 
 		node = node
-			.data(nodes.filter(function(n) { return !n.children; }))
-			.enter().append("text")
-			.attr("class", "node")
+			.data(nodes.filter(function(n) { console.log("n"); console.log(n); return !n.children; }))
+			.enter()
+			.append("svg")
 			.attr("id", function(d){return String.fromCharCode(97 +  d.id)})
+			.each(function(d) {
+				d3.select(this).append("text")
+					.text(function(d) { return d.key; })
+					.style("text-anchor", function(d) { return d.x < 180 ? "start" : "end"; })
+					.attr("transform", function(d) { return "rotate(" + (d.x - 90) + ")translate(" + (d.y + 8) + ","+(d.x < 180 ?4:-4)+")" + (d.x < 180 ? "" : "rotate(180)"); });
+				
+				d3.select(this).append("rect")
+					.attr("x", -10)
+					.attr("y", -20)
+					.attr("width", 200)
+					.attr("height", 40)
+					.attr("fill-opacity", 0)
+					.attr("transform", function(d) { return "rotate(" + (d.x - 90) + ")translate(" + (d.y + 8 +(d.x < 180 ?0:180)) + ",0)" + (d.x < 180 ? "" : "rotate(180)"); });
+			})
+			
+			.attr("class", "node")
 			.attr("dy", ".31em")
 			.attr("cursor","pointer")
 			///last part of the transform is to test whether we are past the 180 mark to flip the text
-			.attr("transform", function(d) { return "rotate(" + (d.x - 90) + ")translate(" + (d.y + 8) + ",0)" + (d.x < 180 ? "" : "rotate(180)"); })
-			.style("text-anchor", function(d) { return d.x < 180 ? "start" : "end"; })
-			.text(function(d) { return d.key; })
+			
+			
 			.on("mouseover", mouseovered)
 			.on("click", clicked)
 			.on("mouseout", mouseouted);
+			
 		
 		//my addition - adds colour coded tags with mouse interaction for highighting KINDS of connection
 		tag = tag
@@ -269,7 +285,14 @@ function($scope,$http, $sce, $routeParams, Data) {
 						if(t==tn){
 							//make the transform and add a circle at distance = spacing * tag_count 
 							var transf = "rotate(" + (nd.x - 90) + ")translate(" + (nd.y + 8 + (tag_count * spacing) ) + ",0)" + (nd.x < 180 ? "" : "rotate(180)");
-							svg.select("g").append("circle").attr("stroke-width","3").attr("fill","none").attr("stroke",tn.colour).attr("class", "tag_circle").attr("r",spacing* 0.3).attr("transform", transf );//function(d) { if (d) return "rotate(" + (d.x - 90) + ")translate(" + (d.y + 8) + ",0)" + (d.x < 180 ? "" : "rotate(180)"); })
+							svg.select("g")
+								.append("circle")
+								.attr("stroke-width","3")
+								.attr("fill","none")
+								.attr("stroke",tn.colour)
+								.attr("class", "tag_circle")
+								.attr("r",spacing* 0.3)
+								.attr("transform", transf );//function(d) { if (d) return "rotate(" + (d.x - 90) + ")translate(" + (d.y + 8) + ",0)" + (d.x < 180 ? "" : "rotate(180)"); })
 							//increment for the next circle
 							tag_count++;
 						}
@@ -277,9 +300,9 @@ function($scope,$http, $sce, $routeParams, Data) {
 				});
 				//you can't have numeric IDs in d3
 				var id = String.fromCharCode(97 +  nd.id);
-				d3.select("#"+id).transition()
+				d3.select("#"+id).select("text").transition()
 					.duration(450)
-					.attr("transform", function(d) { return "rotate(" + (d.x - 90) + ")translate(" + (d.y + tag_count * spacing) + ",0)" + (d.x < 180 ? "" : "rotate(180)"); })
+					.attr("transform", function(d) { return "rotate(" + (d.x - 90) + ")translate(" + (d.y + 8 + tag_count * spacing) + ","+(d.x < 180 ?4:-4)+")" + (d.x < 180 ? "" : "rotate(180)"); })
 			});
 
 			//from the example  - turn off all the nodes' flags identifying them as targets or sources for the links
@@ -310,9 +333,9 @@ function($scope,$http, $sce, $routeParams, Data) {
 				.classed("node--target", false)
 				.classed("node--source", false)
 				//transition back to original position
-				.transition()
+				.select("text").transition()
 				.duration(450)
-				.attr("transform", function(d) { return "rotate(" + (d.x - 90) + ")translate(" + (d.y + 8) + ",0)" + (d.x < 180 ? "" : "rotate(180)"); });
+				.attr("transform", function(d) { return "rotate(" + (d.x - 90) + ")translate(" + (d.y + 8) + ","+(d.x < 180 ?4:-4)+")" + (d.x < 180 ? "" : "rotate(180)"); });
 
 			///get rid of all the little circles
 			d3.selectAll(".tag_circle").remove();
