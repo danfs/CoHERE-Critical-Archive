@@ -255,15 +255,24 @@ function($scope,$http, $sce, $routeParams, Data) {
 			.on("mouseover", function (d){
 				console.log(d);
 				//for each link check if the node at BOTH ends contains the tag you're interested in and return the colour
-		    	link.style("stroke", function (l){ return getLinkTagHighlight(l, d)})
-		    	//filter for having tags and apply a thicker stroke to everything afterwards
-		    	.filter(function(l){ return linkHasTag(l, d) })
-				.classed("link--tagged", true)
-		    	.each(function() { this.parentNode.appendChild(this); });
+				link.style("stroke", function (l){ return getLinkTagHighlight(l, d)})
+					//filter for having tags and apply a thicker stroke to everything afterwards
+					.filter(function(l){ return linkHasTag(l, d) })
+					.classed("link--tagged", true)
+					.each(function() { this.parentNode.appendChild(this); });
+
+				node
+					.filter(function(l){ return nodeHasTag(l, d) })
+					.classed("node--target", true)
+					.classed("node--source", true)
+					.each(function() { this.parentNode.appendChild(this); });
 			})
 			.on("mouseout", function (d){
 				link.style("stroke", "steelblue")
-				.classed("link--tagged", false);
+					.classed("link--tagged", false);
+				node
+					.classed("node--target", false)
+					.classed("node--source", false);
 			});	
 		
 	
@@ -312,8 +321,8 @@ function($scope,$http, $sce, $routeParams, Data) {
 
 		  ///I can't work out why l.source.source rather than just l.source
 		  link
-		      .classed("link--target", function(l) { if (l.target === d) return l.source.source = true; })
-		      .classed("link--source", function(l) { if (l.source === d) return l.target.target = true; })
+			.classed("link--target", function(l) { if (l.target === d) return l.source.source = true; })
+			.classed("link--source", function(l) { if (l.source === d) return l.target.target = true; })
 		      //below is just to bring the right nodes to the front - filter applies itself on anything further on in the method chain	
 		    .filter(function(l) { return l.target === d || l.source === d; })
 		    ///this.parentNode.appendChild(this) just takes the child off and sticks it back on again bringing it to the front
