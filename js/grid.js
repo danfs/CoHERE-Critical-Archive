@@ -4,17 +4,25 @@ angControllers.controller('GridCtrl', ['$scope', '$http', '$sce','$routeParams',
 	
 function($scope,$http, $sce, $routeParams, Data) {
 
+
+	var diameter = 700,
+	radius = diameter / 2,
+	innerRadius = radius - 120;
+
+	var cluster,bundle,line,svg,link,node,tag,data,filteredData;
+
 	Data.getDataAsync(function(results) {
 	
-		var d3_json = wp_json_to_d3_json(results.posts);
-		$scope.d3_json = d3_json;
+		data = wp_json_to_d3_json(results.posts);
+
+		svg = d3.select("#vis_container").append("svg")
+			.attr("width", diameter)
+			.attr("height", diameter)
+			.append("g")
+			.attr("transform", "translate(" + radius + "," + radius + ")");
 
 
-		for (var i in d3_json.tags){
-			d3_json.tags[i].colour = getRandomColor(); 		
-		}
-
-		makeGraph(d3_json);
+		makeGraph();
 	});
 
 	
@@ -43,6 +51,7 @@ function($scope,$http, $sce, $routeParams, Data) {
 			// 			key:ID
 			// 			parent:Object
 			// 			children:Array[]
+			//			date:date
 			// 		},
 			var key = (post.title_plain === undefined) ? "" : post.title_plain; 
 
@@ -58,7 +67,7 @@ function($scope,$http, $sce, $routeParams, Data) {
 					node.id = post.id;
 					node.title = post.title_plain;
 					node.tags = [];
-
+					node.date = new Date(post.date);
 					nodes[key] = node;
 				}
 			}
@@ -169,42 +178,47 @@ function($scope,$http, $sce, $routeParams, Data) {
 
 		return d3JSON;
 	} 	
-	//main function for making the vis - where the magic happens
-	function makeGraph(myjson){	
-			///directly from d3 example
-		var diameter = 700,
-			radius = diameter / 2,
-			innerRadius = radius - 120;
 
-		 var cluster = d3.layout.cluster()
+	//
+
+	//main function for making the vis - where the magic happens
+	function makeGraph(date){	
+
+		svg.selectAll("*").remove();
+		console.log(date);
+		if (date==undefined){
+			filteredData = angular.copy(data);
+		}else{
+			filteredData = filterData(angular.copy(data),date);
+		}
+		
+
+		cluster = d3.layout.cluster()
 			.size([360, innerRadius])
+
 			.sort(function(a, b) { 
 					return d3.descending(b.title.toLowerCase(), a.title.toLowerCase()); })
 			.value(function(d) { return d.size; });
 
-		var bundle = d3.layout.bundle();
+		bundle = d3.layout.bundle();
 
-		var line = d3.svg.line.radial()
+		line = d3.svg.line.radial()
 			.interpolate("bundle")
 			.tension(0.55)
 			.radius(function(d) { return d.y; })
 			.angle(function(d) { return d.x / 180 * Math.PI; });
 
-		var svg = d3.select("#vis_container").append("svg")
-			.attr("width", diameter)
-			.attr("height", diameter)
-			.append("g")
-			.attr("transform", "translate(" + radius + "," + radius + ")");
+		
 
-		var link = svg.append("g").selectAll(".link"),
-			node = svg.append("g").attr("class","all_nodes").selectAll(".node"),
-			tag = d3.select(".tag").selectAll("p");
+		link = svg.selectAll(".link"),
+		node = svg.append("g").attr("class","all_nodes").selectAll(".node"),
+		tag = d3.select(".tag").selectAll("p");
 
 
 		  ////here's where we link the json with the D3 objects
-		var nodes = cluster.nodes(myjson.nodes[""]),
-		 	links = myjson.links,
-		 	tags = Object.keys(myjson.tags).map(function (key) {return myjson.tags[key];});
+		var nodes = cluster.nodes(filteredData.nodes[""]),
+		 	links = filteredData.links,
+		 	tags = Object.keys(filteredData.tags).map(function (key) {return filteredData.tags[key];});
 
 
 		link = link
@@ -220,7 +234,7 @@ function($scope,$http, $sce, $routeParams, Data) {
 				.filter(function(n) { return !n.children; }))			
 			.enter()
 			.append("svg")
-			.attr("id", function(d){return String.fromCharCode(97 +  d.id)})
+			.attr("id", function(d){return "id_"+d.id})
 			.each(function(d) {
 				d3.select(this).append("text")
 					.text(function(d) { return d.key; })
@@ -300,6 +314,7 @@ function($scope,$http, $sce, $routeParams, Data) {
 							var transf = "rotate(" + (nd.x - 90) + ")translate(" + (nd.y + 8 + (tag_count * spacing) ) + ",0)" + (nd.x < 180 ? "" : "rotate(180)");
 							svg.select("g")
 								.append("circle")
+								.attr("pointer-events","none")
 								.attr("stroke-width","3")
 								.attr("fill","none")
 								.attr("stroke",tn.colour)
@@ -312,7 +327,7 @@ function($scope,$http, $sce, $routeParams, Data) {
 					});
 				});
 				//you can't have numeric IDs in d3
-				var id = String.fromCharCode(97 +  nd.id);
+				var id = "id_"+nd.id;
 				d3.select("#"+id).select("text").transition()
 					.duration(450)
 					.attr("transform", function(d) { return "rotate(" + (d.x - 90) + ")translate(" + (d.y + 8 + tag_count * spacing) + ","+(d.x < 180 ?4:-4)+")" + (d.x < 180 ? "" : "rotate(180)"); })
@@ -381,6 +396,42 @@ function($scope,$http, $sce, $routeParams, Data) {
 				}
 			});
 			return has_tag;
+		}
+
+		d3.selectAll("input").on("change", change);
+
+		function change() {
+			if (this.value === "date1")
+				makeGraph(new Date("2015-12-16 10:38:50"));
+			else if (this.value === "date2")
+				makeGraph(new Date("2016-03-09 15:37:58"));
+			else
+				makeGraph();
+		}
+
+		//this is a bit hacky!
+		function filterData(data,date){	
+
+			for (var n in data.nodes) {
+				if (data.nodes[n].hasOwnProperty("date")) {
+					if (data.nodes[n].date>date)
+						delete data.nodes[n];
+				}
+			}
+
+			for(var i = data.nodes[""].children.length -1; i >= 0 ; i--){
+				if(data.nodes[""].children[i].date>date){
+					data.nodes[""].children.splice(i, 1);
+				}
+			}
+
+			for(var i = data.links.length -1; i >= 0 ; i--){
+				if(data.links[i].source.date>date && data.links[i].target.date>date){
+					data.links.splice(n, 1);
+				}
+			}
+
+			return data;
 		}
 
 		///dunno what this is for -matching diameter of svg to height of screen? 
