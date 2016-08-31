@@ -178,14 +178,15 @@ function($scope,$http, $sce, $routeParams, Data) {
 
 		 var cluster = d3.layout.cluster()
 			.size([360, innerRadius])
-			.sort(null)
+			.sort(function(a, b) { 
+					return d3.descending(b.title.toLowerCase(), a.title.toLowerCase()); })
 			.value(function(d) { return d.size; });
 
 		var bundle = d3.layout.bundle();
 
 		var line = d3.svg.line.radial()
 			.interpolate("bundle")
-			.tension(.55)
+			.tension(0.55)
 			.radius(function(d) { return d.y; })
 			.angle(function(d) { return d.x / 180 * Math.PI; });
 
@@ -203,7 +204,7 @@ function($scope,$http, $sce, $routeParams, Data) {
 		  ////here's where we link the json with the D3 objects
 		var nodes = cluster.nodes(myjson.nodes[""]),
 		 	links = myjson.links,
-		 	tags = Object.keys(myjson.tags).map(function (key) {return myjson.tags[key]});
+		 	tags = Object.keys(myjson.tags).map(function (key) {return myjson.tags[key];});
 
 
 		link = link
@@ -215,7 +216,8 @@ function($scope,$http, $sce, $routeParams, Data) {
 
 
 		node = node
-			.data(nodes.filter(function(n) { console.log("n"); console.log(n); return !n.children; }))
+			.data(nodes
+				.filter(function(n) { return !n.children; }))			
 			.enter()
 			.append("svg")
 			.attr("id", function(d){return String.fromCharCode(97 +  d.id)})
