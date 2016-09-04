@@ -72,3 +72,33 @@
 .link--target {
   stroke: #d62728;
 }
+.packery-sizer, .packery-object {
+  width: 360px;
+  /*border: 2px solid;*/
+  /*background-color: red;*/
+  height: 500px;
+}
+.card.single {
+  width: 300px;
+  background-color: #E5E5E5;
+   /*border: 2px solid;*/
+  height: 400px;
+}
+
+.card.double {
+  width: 620px;
+  background-color: green;
+   border: 2px solid;
+  height: 400px;
+}
+
+.card-header {
+  cursor: move;
+   border: 2px solid;
+   background-color: blue;
+}
+
+.project {
+  border-radius: 10px;
+  padding:20px;
+}

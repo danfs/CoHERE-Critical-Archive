@@ -1,9 +1,32 @@
 <h1> CoHERE Critical Archive </h1>
-<form>
-  <label><input type="radio" name="mode" value="date1">2015-12-16 10:38:50</label>
-  <label><input type="radio" name="mode" value="date2">2016-03-09 15:37:58</label>
-  <label><input type="radio" name="mode" value="date3" checked>all</label>
-</form>
-<div class="stay_inline tag"  ></div>
+<select name="singleSelect" ng-model="viewMode">
+      <option value="vis">Visualisation</option>
+      <option value="packery">Grid</option>
+</select>
 
-<div class="stay_inline" style="position: absolute" id="vis_container"></div>
+
+<div ng-show="viewMode=='vis'">
+	<form>
+	  <label><input type="radio" name="mode" value="date1">2015-12-16 10:38:50</label>
+	  <label><input type="radio" name="mode" value="date2">2016-03-09 15:37:58</label>
+	  <label><input type="radio" name="mode" value="date3" checked>all</label>
+	</form>
+	<div class="stay_inline tag"  ></div>
+
+	<div class="stay_inline" style="position: absolute" id="vis_container"></div>
+</div>
+
+<div ng-show="viewMode=='packery'">
+	
+	<packery ng-init="getStuff()" row-height=".card.single" column-width=".card.single" handle=".card-header" draggable="true" percentPosition="true" is-origin-top="true" gutter="20">
+	    <packery-object ng-repeat="i in gridData" ng-style="{'width':i.width,'height':i.height,'background-image': i.url   }" class="card single project" style="overflow:hidden">
+	       {{i.title}}
+	    </packery-object>
+	    
+	<!-- this is a dummy pobject without which it inexplicably breaks -->
+	    <packery-object class="card single" style="width:0px;height:0px; display:none">
+	    </packery-object>
+	</packery>
+
+
+</div>

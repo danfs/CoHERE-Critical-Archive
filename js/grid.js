@@ -9,11 +9,18 @@ function($scope,$http, $sce, $routeParams, Data) {
 	radius = diameter / 2,
 	innerRadius = radius - 120;
 
+	$scope.viewMode = "packery";
+	
+
 	var cluster,bundle,line,svg,link,node,tag,data,filteredData;
 
 	Data.getDataAsync(function(results) {
 	
 		data = wp_json_to_d3_json(results.posts);
+		if(results.posts.length > 3){
+			$scope.viewMode = "vis";
+		}
+
 
 		svg = d3.select("#vis_container").append("svg")
 			.attr("width", diameter)
@@ -21,11 +28,27 @@ function($scope,$http, $sce, $routeParams, Data) {
 			.append("g")
 			.attr("transform", "translate(" + radius + "," + radius + ")");
 
-
+		makePackeryGrid(results.posts);
 		makeGraph();
 	});
+	function makePackeryGrid(data){
+		var dimensions = [200,200,400,400];
 
-	
+		$scope.gridData =data;
+		console.log(data);
+		for (var i = 0; i < $scope.gridData.length; i++) {
+	    	$scope.gridData[i].width=dimensions[getRandomInt(1,3)];
+	    	$scope.gridData[i].height=dimensions[getRandomInt(1,3)];
+	    	if($scope.gridData[i].attachments[0])$scope.gridData[i].url = "url("+$scope.gridData[i].attachments[0].url +")";
+	    	
+	    	
+		};
+
+		
+	}
+	function getRandomInt(min, max) {
+    	return Math.floor(Math.random() * (max - min + 1)) + min;
+	}
   	function getRandomColor() {
 		var letters = '0123456789ABCDEF';
 		var color = '#';
