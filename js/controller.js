@@ -10,7 +10,7 @@ angControllers.filter("trustUrl", ['$sce', function ($sce) {
     }]);
 
 angControllers.factory('Data', function($http){
-	var URL = "http://digitalcultures.ncl.ac.uk/cohere/wordpress/?json=get_category_posts&slug=project&count=30";
+  var URL = "http://digitalcultures.ncl.ac.uk/cohere/wordpress/?json=1";
 	return {
     getDataAsync: function(callback) {
     	//console.log("returned");
