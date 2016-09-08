@@ -275,6 +275,7 @@ function($scope,$http, $sce, $routeParams, Data) {
 			.enter().append("path")
 			.each(function(d) { d.source = d[0], d.target = d[d.length - 1]; })
 			.attr("class", "link")
+			.attr("stroke-width", 4)
 			.attr("d", line);
 
 
@@ -314,7 +315,7 @@ function($scope,$http, $sce, $routeParams, Data) {
 		tag = tag
 			.data(tags
 				.filter(function(d) { return d.LinkCount>0; })
-				.sort(function(a, b) { return d3.ascending(b.catogary, a.catogary) || d3.descending(parseFloat(a.LinkCount), parseFloat(b.LinkCount)) }))
+				.sort(function(a, b) { return d3.ascending(a.parent.category, b.parent.category) || d3.descending(parseFloat(a.LinkCount), parseFloat(b.LinkCount)) }))
 			.enter()
 			.append("p")
 			.style("color", function(d){  return d.colour })
