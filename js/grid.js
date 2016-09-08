@@ -64,6 +64,7 @@ function($scope,$http, $sce, $routeParams, Data) {
 		var nodes = {};
 		var links = [];
 		var tags = {};
+		var categories = {};
 		
 
 		function newNode(post){
@@ -131,13 +132,34 @@ function($scope,$http, $sce, $routeParams, Data) {
 			}			
 		}
 
+		function newCategory(postCategory){
+			// "category":
+			// 		key:{
+			// 			"categoryID": categoryID,
+			// 			"category": category,
+			// 			"value": value,
+			//			"children" [tagID,]
+			// 		},
+			// 		...
+			if(!(postCategory.id+"_id" in categories)){
+				var category = {};
+				category.id = postCategory.id+"_id";
+				category.category = postCategory.title.slice(4);
+				category.children = [];
+
+				categories[postCategory.id+"_id"] = category;
+			}
+
+		}
+
+
 		function newTag(postTag){
 
-			// "tags":[
-			// 		{
+			// "tags":
+			// 		key:{
 			// 			"tagID": tagID,
-			// 			"catogary": catogary,
 			// 			"value": value,
+			//			"parent": categoryID,
 			//			"LinkCount":n
 			// 		},
 			// 		...
@@ -148,17 +170,13 @@ function($scope,$http, $sce, $routeParams, Data) {
 				tag.id = postTag.id;
 				tag.colour = getRandomColor();
 				tag.LinkCount = 0;
-
-				var t = postTag.title.split(":");
-				if (t.length>1){
-					tag.catogary = t[0];
-					tag.value = t[1];
-				}else{
-					tag.catogary = 'null';
-					tag.value = t[0];
-				}
+				tag.value = postTag.title;
+				tag.parent = categories[postTag.parent+"_id"];
 
 				tags[postTag.slug] = tag;
+
+				//add tag to categories
+				categories[postTag.parent+"_id"].children.push(tag);
 			}
 
 			return tags[postTag.slug];
@@ -171,21 +189,29 @@ function($scope,$http, $sce, $routeParams, Data) {
 
 			var sourceNode = newNode(this_post);
 
-			for (var k = 0; k < this_post.tags.length; k++) {
+			for (var k = 0; k < this_post.categories.length; k++) {
 				
-				var tagIndex = newTag(this_post.tags[k]);
+				// WARNING: relise on categories being before tags in the JSON
+				if (this_post.categories[k].title.includes(". ")){
+					//create tage catogary but not link
+					newCategory(this_post.categories[k]);
+				}else{
+					var tagIndex = newTag(this_post.categories[k]);
+				
 		
-				for (var j = 0; j < wp_json.length; j++) {
-					
-					//don't compare a post with itself
-					if(i!=j){
-						var other_post = wp_json[j];
-						for (var l = 0; l < other_post.tags.length; l++) {
-							var this_cat = this_post.tags[k].title.trim().toLowerCase();
-							var that_cat = other_post.tags[l].title.trim().toLowerCase();
-							if(this_cat==that_cat){
-								var targetNode = newNode(other_post);
-								newLink(sourceNode,targetNode,tagIndex);
+					// loop to find matching tags
+					for (var j = 0; j < wp_json.length; j++) {
+						
+						//don't compare a post with itself
+						if(i!=j){
+							var other_post = wp_json[j];
+							for (var l = 0; l < other_post.categories.length; l++) {
+								var this_cat = this_post.categories[k].title.trim().toLowerCase();
+								var that_cat = other_post.categories[l].title.trim().toLowerCase();
+								if(this_cat==that_cat){
+									var targetNode = newNode(other_post);
+									newLink(sourceNode,targetNode,tagIndex);
+								}
 							}
 						}
 					}
@@ -292,7 +318,7 @@ function($scope,$http, $sce, $routeParams, Data) {
 			.enter()
 			.append("p")
 			.style("color", function(d){  return d.colour })
-			.text(function(d){  return d.catogary+" : "+d.value+" ["+d.LinkCount/2+"]" })
+			.text(function(d){  return d.parent.category+" : "+d.value+" ["+d.LinkCount/2+"]" })
 			.on("mouseover", function (d){
 				console.log(d);
 				//for each link check if the node at BOTH ends contains the tag you're interested in and return the colour
