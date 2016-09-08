@@ -117,14 +117,6 @@ function($scope,$http, $sce, $routeParams, Data) {
 			if(!exists){
 				links.push({"source":source,"target":target,"tag":tag});
 				tag.LinkCount += 1;
-				if (source.tags.indexOf(tag) == -1) {
-					source.tags.push(tag);
-				}
-
-				if (target.tags.indexOf(tag) == -1) {
-					target.tags.push(tag);
-				}   
-
 
 				return links.length-1;
 			}else{
@@ -137,7 +129,6 @@ function($scope,$http, $sce, $routeParams, Data) {
 			// 		key:{
 			// 			"categoryID": categoryID,
 			// 			"category": category,
-			// 			"value": value,
 			//			"children" [tagID,]
 			// 		},
 			// 		...
@@ -172,6 +163,7 @@ function($scope,$http, $sce, $routeParams, Data) {
 				tag.LinkCount = 0;
 				tag.value = postTag.title;
 				tag.parent = categories[postTag.parent+"_id"];
+				tag.key = postTag.slug;
 
 				tags[postTag.slug] = tag;
 
@@ -197,7 +189,10 @@ function($scope,$http, $sce, $routeParams, Data) {
 					newCategory(this_post.categories[k]);
 				}else{
 					var tagIndex = newTag(this_post.categories[k]);
-				
+					
+					if (sourceNode.tags.indexOf(tagIndex) == -1) {
+						sourceNode.tags.push(tagIndex);
+					}
 		
 					// loop to find matching tags
 					for (var j = 0; j < wp_json.length; j++) {
@@ -210,6 +205,9 @@ function($scope,$http, $sce, $routeParams, Data) {
 								var that_cat = other_post.categories[l].title.trim().toLowerCase();
 								if(this_cat==that_cat){
 									var targetNode = newNode(other_post);
+									if (targetNode.tags.indexOf(tagIndex) == -1) {
+										targetNode.tags.push(tagIndex);
+									}
 									newLink(sourceNode,targetNode,tagIndex);
 								}
 							}
@@ -222,6 +220,7 @@ function($scope,$http, $sce, $routeParams, Data) {
 		d3JSON = {
 			"nodes":nodes,
 			"links":links,
+			"categories":categories,
 			"tags":tags
 		};
 
@@ -261,12 +260,14 @@ function($scope,$http, $sce, $routeParams, Data) {
 
 		link = svg.selectAll(".link"),
 		node = svg.append("g").attr("class","all_nodes").selectAll(".node"),
+		category = d3.select(".tag").selectAll("button"),
 		tag = d3.select(".tag").selectAll("p");
 
 
 		  ////here's where we link the json with the D3 objects
 		var nodes = cluster.nodes(filteredData.nodes[""]),
 		 	links = filteredData.links,
+		 	categories = Object.keys(filteredData.categories).map(function (key) {return filteredData.categories[key];}),
 		 	tags = Object.keys(filteredData.tags).map(function (key) {return filteredData.tags[key];});
 
 
@@ -311,38 +312,60 @@ function($scope,$http, $sce, $routeParams, Data) {
 			.on("mouseout", mouseouted);
 			
 		
-		//my addition - adds colour coded tags with mouse interaction for highighting KINDS of connection
-		tag = tag
-			.data(tags
-				.filter(function(d) { return d.LinkCount>0; })
-				.sort(function(a, b) { return d3.ascending(a.parent.category, b.parent.category) || d3.descending(parseFloat(a.LinkCount), parseFloat(b.LinkCount)) }))
+		category = category.data(categories)
 			.enter()
-			.append("p")
-			.style("color", function(d){  return d.colour })
-			.text(function(d){  return d.parent.category+" : "+d.value+" ["+d.LinkCount/2+"]" })
-			.on("mouseover", function (d){
-				console.log(d);
-				//for each link check if the node at BOTH ends contains the tag you're interested in and return the colour
-				link.style("stroke", function (l){ return getLinkTagHighlight(l, d)})
-					//filter for having tags and apply a thicker stroke to everything afterwards
-					.filter(function(l){ return linkHasTag(l, d) })
-					.classed("link--tagged", true)
-					.each(function() { this.parentNode.appendChild(this); });
+			.append("div")
+			.each(function(d) {
+				d3.select(this).append("button")
+					.text(function(d){  return d.category+" ("+(d.children.length)+")";})
+					.attr("class", "accordion")
+					.on("click", function(d) {
+        				console.log(this);
+        				this.classList.toggle("active");
+        				this.nextElementSibling.classList.toggle("show");
+        			});
+				d3.select(this).append("div")
+					.attr("class", "panel")
+					.attr("id", function(d){  return d.id;})
+					.each(function(d) {
+						var tagDiv = d3.select(this);
 
-				node
-					.filter(function(l){ return nodeHasTag(l, d) })
-					.classed("node--target", true)
-					.classed("node--source", true)
-					.each(function() { this.parentNode.appendChild(this); });
-			})
-			.on("mouseout", function (d){
-				link.style("stroke", "steelblue")
-					.classed("link--tagged", false);
-				node
-					.classed("node--target", false)
-					.classed("node--source", false);
-			});	
-		
+						for (var i = 0; i < d.children.length; i++) {
+							tagDiv.append("p")
+								.style("color", function(d){  return d.children[i].colour })
+								.text(function(d){  return d.children[i].value+" ["+d.children[i].LinkCount+"]" })
+								.attr("id", function(d){  return d.children[i].key;})
+								.on("mouseover", function (t){
+
+									//TODO: this is a bit of a hacky way, should make direct referance to the objects rather than using the element id
+									var this_tag = this.id.toString();
+
+									//for each link check if the node at BOTH ends contains the tag you're interested in and return the colour
+									link.style("stroke", function (l){ 
+											return getLinkTagHighlight(l, this_tag)
+										})
+										//filter for having tags and apply a thicker stroke to everything afterwards
+										.filter(function(l){ return linkHasTag(l, this_tag) })
+										.classed("link--tagged", true)
+										.each(function() { this.parentNode.appendChild(this); });
+
+									node
+										.filter(function(l){ return nodeHasTag(l, this_tag) })
+										.classed("node--target", true)
+										.classed("node--source", true)
+										.each(function() { this.parentNode.appendChild(this); });
+								})
+								.on("mouseout", function (d){
+									link.style("stroke", "steelblue")
+										.classed("link--tagged", false);
+									node
+										.classed("node--target", false)
+										.classed("node--source", false);
+								});	
+							}
+						}
+        			);
+        		});
 	
 		function clicked(d){			
 			window.location.href = '#/grid/'+d.id;
@@ -422,7 +445,7 @@ function($scope,$http, $sce, $routeParams, Data) {
 		function getLinkTagHighlight(l, t){
 			//if the link connects to nodes having a tag then return the mapped colour otherwise return default
 			if(linkHasTag(l, t)){
-				return t.colour;
+				return data.tags[t].colour;
 			}
 			return "steelblue";
 
@@ -451,7 +474,7 @@ function($scope,$http, $sce, $routeParams, Data) {
 		function nodeHasTag(node, tag){
 			var has_tag = false;
 			node.tags.forEach(function(n){
-				if(n===tag) {
+				if(n.key===tag) {
 					has_tag = true;
 				}
 			});

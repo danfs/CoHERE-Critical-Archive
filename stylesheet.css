@@ -72,6 +72,11 @@
 .link--target {
   stroke: #d62728;
 }
+
+.tag {
+  height: 80vh;
+  overflow: scroll;
+}
 .packery-sizer, .packery-object {
   width: 360px;
   /*border: 2px solid;*/
@@ -101,4 +106,49 @@
 .project {
   border-radius: 10px;
   padding:20px;
+}
+
+button.accordion {
+    background-color: #eee;
+    border: none;
+    color: #444;
+    cursor: pointer;
+    font-size: 15px;
+    height: 36px;
+    outline: none;
+    padding: 5px 10px;
+    text-align: left;
+    transition: 0.4s;
+    width: 100%;
+}
+
+button.accordion.active, button.accordion:hover {
+    background-color: #ddd;
+}
+
+button.accordion:after {
+    content: '\02795';
+    font-size: 13px;
+    color: #777;
+    float: right;
+    margin-left: 5px;
+}
+
+button.accordion.active:after {
+    content: "\2796";
+}
+
+div.panel {
+    padding: 0 18px;
+    background-color: white;
+    max-height: 0;
+    margin-bottom: 4px;
+    overflow: hidden;
+    transition: 0.6s ease-in-out;
+    opacity: 0;
+}
+
+div.panel.show {
+    opacity: 1;
+    max-height: 500px;
 }
