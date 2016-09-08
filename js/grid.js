@@ -275,7 +275,7 @@ function($scope,$http, $sce, $routeParams, Data) {
 			.enter().append("path")
 			.each(function(d) { d.source = d[0], d.target = d[d.length - 1]; })
 			.attr("class", "link")
-			.attr("stroke-width", 4)
+			.attr("stroke-width", function(d) {return getLinkCount(d.source,d.target)*2})
 			.attr("d", line);
 
 
@@ -426,6 +426,16 @@ function($scope,$http, $sce, $routeParams, Data) {
 			}
 			return "steelblue";
 
+		}
+
+		function getLinkCount(source,target){
+			var count = 0;
+			for(var i = 0; i < data.links.length ; i++){
+				if(data.links[i].source.id==source.id && data.links[i].target.id===target.id){
+					count ++;
+				}
+			}
+			return count;
 		}
 
 		function linkHasTag(link, tag){
