@@ -38,6 +38,7 @@
 .link--tagged {
  /* .style("stroke-width", "2")
           .style("stroke-opacity", "1")*/
+  stroke: #d62728;
   stroke-opacity: 1;
   stroke-width: 3px;
 }
@@ -165,6 +166,7 @@ div.panel {
 
 div.panel p {
   cursor: pointer;
+  color: #d62728;
 }
 
 div.panel.show {
