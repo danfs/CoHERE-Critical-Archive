@@ -335,7 +335,7 @@ function($scope,$http, $sce, $routeParams, Data) {
         			.append("span")
         			.attr("title",function(d){  return d.category})
         			.text(function(d){ 
-        				return d.category.slice(0,23)+ (d.category.length>23 ? "..." : "")+" ("+(d.children.length)+")";});
+        				return d.category.slice(0,23)+ (d.category.length>23 ? "..." : "")+" ["+(d.children.length)+"]";});
 				d3.select(this).append("div")
 					.attr("class", "panel")
 					.attr("id", function(d){  return d.id;})
