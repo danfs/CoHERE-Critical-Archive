@@ -344,7 +344,7 @@ function($scope,$http, $sce, $routeParams, Data) {
 
 						for (var i = 0; i < d.children.length; i++) {
 							tagDiv.append("p")
-								.style("color", function(d){  return d.children[i].colour })
+								//.style("color", function(d){  return d.children[i].colour })
 								.text(function(d){  return d.children[i].value+" ["+d.children[i].LinkCount+"]" })
 								.attr("id", function(d){  return d.children[i].key;})
 								.on("mouseover", function (t){
@@ -353,9 +353,7 @@ function($scope,$http, $sce, $routeParams, Data) {
 									var this_tag = this.id.toString();
 
 									//for each link check if the node at BOTH ends contains the tag you're interested in and return the colour
-									link.style("stroke", function (l){ 
-											return getLinkTagHighlight(l, this_tag)
-										})
+									link
 										//filter for having tags and apply a thicker stroke to everything afterwards
 										.filter(function(l){ return linkHasTag(l, this_tag) })
 										.classed("link--tagged", true)
@@ -387,40 +385,6 @@ function($scope,$http, $sce, $routeParams, Data) {
 			//get a unique list of the tags from this node
 			var active_tags = d.tags;
 
-			/*
-			///make a dot for each node that has a matching tag
-			node.each(function(nd){
-				var this_nodes_tags = nd.tags;
-				var spacing=14;
-				var tag_count = 0;
-				active_tags.forEach(function(t){
-					this_nodes_tags.forEach(function(tn){
-						//if this node has a tag matching the rolled over tag then....
-						if(t==tn){
-							//make the transform and add a circle at distance = spacing * tag_count 
-							var transf = "rotate(" + (nd.x - 90) + ")translate(" + (nd.y + 8 + (tag_count * spacing) ) + ",0)" + (nd.x < 180 ? "" : "rotate(180)");
-							svg.select("g")
-								.append("circle")
-								.attr("pointer-events","none")
-								.attr("stroke-width","3")
-								.attr("fill","none")
-								.attr("stroke",tn.colour)
-								.attr("class", "tag_circle")
-								.attr("r",spacing* 0.3)
-								.attr("transform", transf );//function(d) { if (d) return "rotate(" + (d.x - 90) + ")translate(" + (d.y + 8) + ",0)" + (d.x < 180 ? "" : "rotate(180)"); })
-							//increment for the next circle
-							tag_count++;
-						}
-					});
-				});
-				//you can't have numeric IDs in d3
-				var id = "id_"+nd.id;
-				d3.select("#"+id).select("text").transition()
-					.duration(450)
-					.attr("transform", function(d) { return "rotate(" + (d.x - 90) + ")translate(" + (d.y + 8 + tag_count * spacing) + ","+(d.x < 180 ?4:-4)+")" + (d.x < 180 ? "" : "rotate(180)"); })
-			});
-			*/
-
 			//from the example  - turn off all the nodes' flags identifying them as targets or sources for the links
 		  node
 		      .each(function(n) { n.target = n.source = false; });
@@ -448,14 +412,7 @@ function($scope,$http, $sce, $routeParams, Data) {
 			node
 				.classed("node--target", false)
 				.classed("node--source", false)
-				//transition back to original position
-				/*
-				.select("text").transition()
-				.duration(450)
-				.attr("transform", function(d) { return "rotate(" + (d.x - 90) + ")translate(" + (d.y + 8) + ","+(d.x < 180 ?4:-4)+")" + (d.x < 180 ? "" : "rotate(180)"); });
-				*/
-			///get rid of all the little circles
-			//d3.selectAll(".tag_circle").remove();
+
 		}
 		
 		function getLinkTagHighlight(l, t){
