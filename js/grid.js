@@ -5,7 +5,7 @@ angControllers.controller('GridCtrl', ['$scope', '$http', '$sce','$routeParams',
 function($scope,$http, $sce, $routeParams, Data) {
 
 
-	var diameter = 700,
+	var diameter = 600,
 	radius = diameter / 2,
 	innerRadius = radius - 120;
 
@@ -290,15 +290,24 @@ function($scope,$http, $sce, $routeParams, Data) {
 				d3.select(this).append("text")
 					.text(function(d) { return d.key; })
 					.style("text-anchor", function(d) { return d.x < 180 ? "start" : "end"; })
-					.attr("transform", function(d) { return "rotate(" + (d.x - 90) + ")translate(" + (d.y + 8) + ","+(d.x < 180 ?4:-4)+")" + (d.x < 180 ? "" : "rotate(180)"); });
+					.attr("transform", function(d) { return "rotate(" + (d.x - 90) + ")translate(" + (d.y + 15) + ","+(d.x < 180 ?4:-4)+")" + (d.x < 180 ? "" : "rotate(180)"); });
 				
 				d3.select(this).append("rect")
 					.attr("x", -10)
-					.attr("y", -20)
+					.attr("y", -10)
 					.attr("width", 200)
 					.attr("height", 40)
 					.attr("fill-opacity", 0)
 					.attr("transform", function(d) { return "rotate(" + (d.x - 90) + ")translate(" + (d.y + 8 +(d.x < 180 ?0:180)) + ",0)" + (d.x < 180 ? "" : "rotate(180)"); });
+
+				var transf = "rotate(" + (d.x - 90) + ")translate(" + (d.y+5) + ",0)" + (d.x < 180 ? "" : "rotate(180)");
+				d3.select(this).append("circle")
+					.attr("pointer-events","none")
+					.attr("stroke-width","3")
+					.attr("fill","none")
+					.attr("class", "circle")
+					.attr("r", 5)
+					.attr("transform", transf );
 			})
 			
 			.attr("class", "node")
@@ -317,13 +326,16 @@ function($scope,$http, $sce, $routeParams, Data) {
 			.append("div")
 			.each(function(d) {
 				d3.select(this).append("button")
-					.text(function(d){  return d.category+" ("+(d.children.length)+")";})
 					.attr("class", "accordion")
 					.on("click", function(d) {
         				console.log(this);
         				this.classList.toggle("active");
         				this.nextElementSibling.classList.toggle("show");
-        			});
+        			})
+        			.append("span")
+        			.attr("title",function(d){  return d.category})
+        			.text(function(d){ 
+        				return d.category.slice(0,23)+ (d.category.length>23 ? "..." : "")+" ("+(d.children.length)+")";});
 				d3.select(this).append("div")
 					.attr("class", "panel")
 					.attr("id", function(d){  return d.id;})
@@ -356,7 +368,7 @@ function($scope,$http, $sce, $routeParams, Data) {
 										.each(function() { this.parentNode.appendChild(this); });
 								})
 								.on("mouseout", function (d){
-									link.style("stroke", "steelblue")
+									link.style("stroke", null)
 										.classed("link--tagged", false);
 									node
 										.classed("node--target", false)
@@ -374,6 +386,8 @@ function($scope,$http, $sce, $routeParams, Data) {
 		function mouseovered(d) {
 			//get a unique list of the tags from this node
 			var active_tags = d.tags;
+
+			/*
 			///make a dot for each node that has a matching tag
 			node.each(function(nd){
 				var this_nodes_tags = nd.tags;
@@ -405,6 +419,7 @@ function($scope,$http, $sce, $routeParams, Data) {
 					.duration(450)
 					.attr("transform", function(d) { return "rotate(" + (d.x - 90) + ")translate(" + (d.y + 8 + tag_count * spacing) + ","+(d.x < 180 ?4:-4)+")" + (d.x < 180 ? "" : "rotate(180)"); })
 			});
+			*/
 
 			//from the example  - turn off all the nodes' flags identifying them as targets or sources for the links
 		  node
@@ -434,12 +449,13 @@ function($scope,$http, $sce, $routeParams, Data) {
 				.classed("node--target", false)
 				.classed("node--source", false)
 				//transition back to original position
+				/*
 				.select("text").transition()
 				.duration(450)
 				.attr("transform", function(d) { return "rotate(" + (d.x - 90) + ")translate(" + (d.y + 8) + ","+(d.x < 180 ?4:-4)+")" + (d.x < 180 ? "" : "rotate(180)"); });
-
+				*/
 			///get rid of all the little circles
-			d3.selectAll(".tag_circle").remove();
+			//d3.selectAll(".tag_circle").remove();
 		}
 		
 		function getLinkTagHighlight(l, t){
@@ -447,7 +463,7 @@ function($scope,$http, $sce, $routeParams, Data) {
 			if(linkHasTag(l, t)){
 				return data.tags[t].colour;
 			}
-			return "steelblue";
+			//return "steelblue";
 
 		}
 

@@ -1,19 +1,38 @@
-<h1> CoHERE Critical Archive </h1>
-<select name="singleSelect" ng-model="viewMode">
-      <option value="vis">Visualisation</option>
-      <option value="packery">Grid</option>
-</select>
+<div style="height:100px">
+	<div class="logo"><img src="images/logo.png" style="width: 80px;"></div>
+	<div class="cntls">
+		<h1>Critical Archive </h1>
+		<div style="float: right; margin-top: -50px;"">
+            <div class="radio">
+                <label>
+                    <input type="radio" value="vis" ng-model="viewMode">
+                    <i class="fa fa-share-alt fa-2" aria-hidden="true"></i>
+                </label>
+            </div>
+            <div class="radio">
+                <label>
+                    <input type="radio" value="packery" ng-model="viewMode" checked="checked">
+                    <i class="fa fa-th fa-2" aria-hidden="true"></i>
+                </label>
+            </div>
+        </div>
+
+		</select>
+	</div>
+</div>
 
 
 <div ng-show="viewMode=='vis'">
+	
+	<div class="stay_inline tag"></div>
+
+	<div class="stay_inline" style="position: absolute" id="vis_container"></div>
+
 	<form>
 	  <label><input type="radio" name="mode" value="date1">2015-12-16 10:38:50</label>
 	  <label><input type="radio" name="mode" value="date2">2016-03-09 15:37:58</label>
 	  <label><input type="radio" name="mode" value="date3" checked>all</label>
 	</form>
-	<div class="stay_inline tag"  ></div>
-
-	<div class="stay_inline" style="position: absolute" id="vis_container"></div>
 </div>
 
 <div ng-show="viewMode=='packery'">

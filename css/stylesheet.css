@@ -1,4 +1,8 @@
 
+.logo {
+    float: left;
+    margin-right: 20px;
+}
 .stay_inline{
 	margin: 0px,auto;
 	display: inline-block;
@@ -6,7 +10,6 @@
 }
 #container {
 	width:1000px;
-	top: 15px;
 	margin:0 auto;
 	display: block;
 	position: relative;
@@ -16,7 +19,7 @@
 }
 
 .node {
-  font: 300 11px "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font: 400 14px "Helvetica Neue", Helvetica, Arial, sans-serif;
   fill: #bbb;
   overflow: visible !important;
 }
@@ -26,7 +29,7 @@
 }
 
 .link {
-  stroke: steelblue;
+  stroke: #666666;
   stroke-opacity: .4;
   fill: none;
   pointer-events: none;
@@ -36,7 +39,7 @@
  /* .style("stroke-width", "2")
           .style("stroke-opacity", "1")*/
   stroke-opacity: 1;
-  stroke-width: 2px;
+  stroke-width: 3px;
 }
 .link--untagged {
  /* .style("stroke-width", "2")
@@ -48,21 +51,31 @@
 .node:hover,
 .node--source,
 .node--target {
-  font-weight: 700;
+  
+}
+
+.node:hover .circle,
+.node--target .circle,
+.node--source .circle{
+  stroke: #d62728;
 }
 
 .node--source {
-  fill: #2ca02c;
+  fill: #000;
 }
 
 .node--target {
-  fill: rgba(140,140,140,1);
+  //fill: rgba(140,140,140,1);
 }
 
 .link--source,
 .link--target {
   stroke-opacity: 1;
-  stroke-width: 2px;
+  stroke-width: 3px;
+}
+
+.circle {
+  stroke: black;
 }
 
 .link--source {
@@ -76,6 +89,8 @@
 .tag {
   height: 80vh;
   overflow: scroll;
+  max-width: 300px;
+  float: right;
 }
 .packery-sizer, .packery-object {
   width: 360px;
@@ -104,12 +119,12 @@
 }
 
 .project {
-  border-radius: 10px;
+  border-radius: 5px;
   padding:20px;
 }
 
 button.accordion {
-    background-color: #eee;
+    background-color: #ccc;
     border: none;
     color: #444;
     cursor: pointer;
@@ -123,7 +138,7 @@ button.accordion {
 }
 
 button.accordion.active, button.accordion:hover {
-    background-color: #ddd;
+    background-color: #aaa;
 }
 
 button.accordion:after {
@@ -140,7 +155,7 @@ button.accordion.active:after {
 
 div.panel {
     padding: 0 18px;
-    background-color: white;
+    background-color: #EEE;
     max-height: 0;
     margin-bottom: 4px;
     overflow: hidden;
@@ -148,7 +163,27 @@ div.panel {
     opacity: 0;
 }
 
+div.panel p {
+  cursor: pointer;
+}
+
 div.panel.show {
     opacity: 1;
     max-height: 500px;
 }
+
+.radio {
+  display: inline;
+  font-size: 30px;
+  color: #666;
+}
+.radio input {
+  visibility:hidden;
+}
+.radio label {
+  padding-left: 5px;
+}
+
+:checked + i{
+  color: #d62728;
+} 
