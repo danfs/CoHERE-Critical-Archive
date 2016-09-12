@@ -2,7 +2,7 @@
 	<div class="logo"><img src="images/logo.png" style="width: 80px;"></div>
 	<div class="cntls">
 		<h1>Critical Archive </h1>
-		<div style="float: right; margin-top: -50px;"">
+		<div style="float: right; margin-top: -50px;">
             <div class="radio">
                 <label>
                     <input type="radio" value="vis" ng-model="viewMode">
@@ -39,7 +39,7 @@
 	
 	<packery ng-init="getStuff()" row-height=".card.single" column-width=".card.single" handle=".card-header" draggable="true" percentPosition="true" is-origin-top="true" gutter="20">
 	    <packery-object ng-repeat="i in gridData" ng-style="{'width':i.width,'height':i.height,'background-image': i.url   }" class="card single project" style="overflow:hidden">
-	       {{i.title}}
+	       <a href="#/grid/{{i.id}}">{{i.title}}</a>
 	    </packery-object>
 	    
 	<!-- this is a dummy pobject without which it inexplicably breaks -->
