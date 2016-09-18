@@ -276,7 +276,7 @@ function($scope,$http, $sce, $routeParams, Data) {
 			.enter().append("path")
 			.each(function(d) { d.source = d[0], d.target = d[d.length - 1]; })
 			.attr("class", "link")
-			.attr("stroke-width", function(d) {return getLinkCount(d.source,d.target)*2})
+			.attr("stroke-width", function(d) {return getLineThickness(d.source,d.target)})
 			.attr("d", line);
 
 
@@ -435,6 +435,31 @@ function($scope,$http, $sce, $routeParams, Data) {
 			}
 			//return "steelblue";
 
+		}
+
+		var maxLinks;
+		var maxTickness = 10;
+		function getLineThickness(source,target){
+			//set maxLinks if not set
+			if (!maxLinks) maxLinks = getMaxLinks();
+			if(maxLinks>10){
+				//scale to a max of 10
+				return mapValue(getLinkCount(source,target),maxLinks,maxTickness);
+			}else{
+				return getLinkCount(source,target);
+			}
+		}
+		function mapValue(value,in_max,out_max){
+			Math.round(value * out_max / in_max);
+		}
+
+		function getMaxLinks(){
+			filteredData.links.forEach(function(n){
+				var linkThickness = getLinkCount(n.source,n.target);
+				if(linkThickness>maxLinks||!maxLinks) {
+					maxLinks = linkThickness;
+				}
+			});
 		}
 
 		function getLinkCount(source,target){
