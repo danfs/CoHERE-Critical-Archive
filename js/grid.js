@@ -314,11 +314,17 @@ function($scope,$http, $sce, $routeParams, Data) {
 			.attr("dy", ".31em")
 			.attr("cursor","pointer")
 			///last part of the transform is to test whether we are past the 180 mark to flip the text
-			
-			
+				
 			.on("mouseover", mouseovered)
 			.on("click", clicked)
-			.on("mouseout", mouseouted);
+			.on("mouseout", mouseouted)
+			.append("title").each(function(d) {
+				var toolTip="";
+				for (var i = 0; i < d.tags.length; i++) {
+					toolTip += d.tags[i].value+", ";
+				}
+				d3.select(this).text(toolTip);
+			});
 			
 		
 		category = category.data(categories
