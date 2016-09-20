@@ -308,6 +308,15 @@ function($scope,$http, $sce, $routeParams, Data) {
 					.attr("class", "circle")
 					.attr("r", 5)
 					.attr("transform", transf );
+
+				d3.select(this).append("title")
+					.each(function(d) {
+						var toolTip="";
+						for (var i = 0; i < d.tags.length; i++) {
+							toolTip += d.tags[i].value+", ";
+						}
+						d3.select(this).text(toolTip);
+					});
 			})
 			
 			.attr("class", "node")
@@ -317,18 +326,11 @@ function($scope,$http, $sce, $routeParams, Data) {
 				
 			.on("mouseover", mouseovered)
 			.on("click", clicked)
-			.on("mouseout", mouseouted)
-			.append("title").each(function(d) {
-				var toolTip="";
-				for (var i = 0; i < d.tags.length; i++) {
-					toolTip += d.tags[i].value+", ";
-				}
-				d3.select(this).text(toolTip);
-			});
+			.on("mouseout", mouseouted);
 			
 		
-		category = category.data(categories
-				.filter(function(n) { return  hasChildrenWithLinks(n)}))
+		category = category.data(categories)
+				//.filter(function(n) { return  hasChildrenWithLinks(n)}))
 			.enter()
 			.append("div")
 			.each(function(d) {
@@ -351,37 +353,36 @@ function($scope,$http, $sce, $routeParams, Data) {
 						var tagDiv = d3.select(this);
 
 						for (var i = 0; i < d.children.length; i++) {
-							if (d.children[i].LinkCount>0){
-								tagDiv.append("p")
-									//.style("color", function(d){  return d.children[i].colour })
-									.text(function(d){  return d.children[i].value })
-									.attr("id", function(d){  return d.children[i].key;})
-									.on("mouseover", function (t){
+							tagDiv.append("p")
+								//.style("color", function(d){  return d.children[i].colour })
+								.text(function(d){  return d.children[i].value })
+								.attr("id", function(d){  return d.children[i].key;})
+								.on("mouseover", function (t){
 
-										//TODO: this is a bit of a hacky way, should make direct referance to the objects rather than using the element id
-										var this_tag = this.id.toString();
+									//TODO: this is a bit of a hacky way, should make direct referance to the objects rather than using the element id
+									var this_tag = this.id.toString();
 
-										//for each link check if the node at BOTH ends contains the tag you're interested in and return the colour
-										link
-											//filter for having tags and apply a thicker stroke to everything afterwards
-											.filter(function(l){ return linkHasTag(l, this_tag) })
-											.classed("link--tagged", true)
-											.each(function() { this.parentNode.appendChild(this); });
+									//for each link check if the node at BOTH ends contains the tag you're interested in and return the colour
+									link
+										//filter for having tags and apply a thicker stroke to everything afterwards
+										.filter(function(l){ return linkHasTag(l, this_tag) })
+										.classed("link--tagged", true)
+										.each(function() { this.parentNode.appendChild(this); });
 
-										node
-											.filter(function(l){ return nodeHasTag(l, this_tag) })
-											.classed("node--target", true)
-											.classed("node--source", true)
-											.each(function() { this.parentNode.appendChild(this); });
-									})
-									.on("mouseout", function (d){
-										link.style("stroke", null)
-											.classed("link--tagged", false);
-										node
-											.classed("node--target", false)
-											.classed("node--source", false);
-									});	
-								}
+									node
+										.filter(function(l){ return nodeHasTag(l, this_tag) })
+										.classed("node--target", true)
+										.classed("node--source", true)
+										.each(function() { 
+											this.parentNode.appendChild(this); });
+								})
+								.on("mouseout", function (d){
+									link.style("stroke", null)
+										.classed("link--tagged", false);
+									node
+										.classed("node--target", false)
+										.classed("node--source", false);
+								});	
 							}
 						}
         			);
