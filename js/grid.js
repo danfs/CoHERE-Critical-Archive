@@ -342,18 +342,6 @@ function($scope,$http, $sce, $routeParams, Data) {
 			.enter()
 			.append("div")
 			.each(function(d) {
-				d3.select(this).append("button")
-					.attr("class", "accordion")
-					.on("click", function(d) {
-        				console.log(this);
-        				this.classList.toggle("active");
-        				this.nextElementSibling.classList.toggle("show");
-        			})
-        			.append("span")
-        			.attr("title",function(d){  return d.category})
-        			.text(function(d){ 
-        				return d.category.slice(0,23)+ (d.category.length>23 ? "..." : "");});
-
 				d3.select(this).append("div")
 					.attr("class", "panel")
 					.attr("id", function(d){  return d.id;})
@@ -365,6 +353,7 @@ function($scope,$http, $sce, $routeParams, Data) {
 								//.style("color", function(d){  return d.children[i].colour })
 								.text(function(d){  return d.children[i].value })
 								.attr("id", function(d){  return d.children[i].key;})
+								.attr("class", "people")
 								.on("mouseover", function (t){
 
 									//TODO: this is a bit of a hacky way, should make direct referance to the objects rather than using the element id
@@ -374,22 +363,22 @@ function($scope,$http, $sce, $routeParams, Data) {
 									link
 										//filter for having tags and apply a thicker stroke to everything afterwards
 										.filter(function(l){ return linkHasTag(l, this_tag) })
-										.classed("link--tagged", true)
+										.classed("link-people-tagged", true)
 										.each(function() { this.parentNode.appendChild(this); });
 
 									node
 										.filter(function(l){ return nodeHasTag(l, this_tag) })
-										.classed("node--target", true)
-										.classed("node--source", true)
+										.classed("node-people-target", true)
+										.classed("node-people-source", true)
 										.each(function() { 
 											this.parentNode.appendChild(this); });
 								})
 								.on("mouseout", function (d){
 									link.style("stroke", null)
-										.classed("link--tagged", false);
+										.classed("link-people-tagged", false);
 									node
-										.classed("node--target", false)
-										.classed("node--source", false);
+										.classed("node-people-target", false)
+										.classed("node-people-source", false);
 								});	
 							}
 						}

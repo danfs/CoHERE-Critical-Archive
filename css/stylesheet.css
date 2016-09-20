@@ -36,6 +36,19 @@
   pointer-events: none;
 }
 
+.link-people-tagged {
+ /* .style("stroke-width", "2")
+          .style("stroke-opacity", "1")*/
+  stroke: #002768;
+  stroke-opacity: 1;
+  stroke-width: 3px;
+}
+.link-people-untagged {
+ /* .style("stroke-width", "2")
+          .style("stroke-opacity", "1")*/
+  stroke-opacity: 0.4;
+  stroke-width: 1px;
+}
 .link--tagged {
  /* .style("stroke-width", "2")
           .style("stroke-opacity", "1")*/
@@ -50,19 +63,17 @@
   stroke-width: 1px;
 }
 
-.node:hover,
-.node--source,
-.node--target {
-  
+.node-people-target .circle, 
+.node-people-source .circle{
+  stroke: #002768;
 }
-
 .node:hover .circle,
 .node--target .circle,
 .node--source .circle{
   stroke: #d62728;
 }
 
-.node--source {
+.node--source, .node-people-source  {
   fill: #000;
 }
 
@@ -176,6 +187,10 @@ div.panel p {
   cursor: pointer;
   color: #d62728;
   margin: 8px 0 8px;
+}
+
+div.panel p.people {
+  color: #002768;
 }
 
 div.panel p:hover {
