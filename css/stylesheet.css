@@ -4,6 +4,7 @@
     margin-right: 20px;
 }
 .stay_inline{
+  width: 100%;
 	margin: 0px,auto;
 	display: inline-block;
 	vertical-align: top;
@@ -86,12 +87,14 @@
 .link--target {
   stroke: #d62728;
 }
+.tagHolder {
+  max-width: 250px;
+  float: right;
+}
 
 .tag {
-  height: 80vh;
+  height: 60vh;
   overflow: scroll;
-  max-width: 300px;
-  float: right;
 }
 .packery-sizer, .packery-object {
   width: 360px;

@@ -135,7 +135,11 @@ function($scope,$http, $sce, $routeParams, Data) {
 			if(!(postCategory.id+"_id" in categories)){
 				var category = {};
 				category.id = postCategory.id+"_id";
-				category.category = postCategory.title.slice(4);
+				if (this_post.categories[k].title == "People"){
+					category.category = postCategory.title
+				}else{
+					category.category = postCategory.title.slice(4);
+				}
 				category.children = [];
 
 				categories[postCategory.id+"_id"] = category;
@@ -182,12 +186,15 @@ function($scope,$http, $sce, $routeParams, Data) {
 			var sourceNode = newNode(this_post);
 
 			for (var k = 0; k < this_post.categories.length; k++) {
-				
-				// WARNING: relise on categories being before tags in the JSON
-				if (this_post.categories[k].title.includes(". ")){
+				//Get Categories first
+				if (this_post.categories[k].parent == 0){
 					//create tage catogary but not link
 					newCategory(this_post.categories[k]);
-				}else{
+				}
+			}
+
+			for (var k = 0; k < this_post.categories.length; k++) {
+				if (this_post.categories[k].parent != 0){
 					var tagIndex = newTag(this_post.categories[k]);
 					
 					if (sourceNode.tags.indexOf(tagIndex) == -1) {
@@ -261,7 +268,7 @@ function($scope,$http, $sce, $routeParams, Data) {
 		link = svg.selectAll(".link"),
 		node = svg.append("g").attr("class","all_nodes").selectAll(".node"),
 		category = d3.select(".tag").selectAll("button"),
-		tag = d3.select(".tag").selectAll("p");
+		people = d3.select(".people").selectAll("p");
 
 
 		  ////here's where we link the json with the D3 objects
@@ -273,7 +280,8 @@ function($scope,$http, $sce, $routeParams, Data) {
 
 		link = link
 			.data(bundle(links))
-			.enter().append("path")
+			.enter()
+			.append("path")
 			.each(function(d) { d.source = d[0], d.target = d[d.length - 1]; })
 			.attr("class", "link")
 			.attr("stroke-width", function(d) {return getLineThickness(d.source,d.target)})
@@ -329,8 +337,8 @@ function($scope,$http, $sce, $routeParams, Data) {
 			.on("mouseout", mouseouted);
 			
 		
-		category = category.data(categories)
-				//.filter(function(n) { return  hasChildrenWithLinks(n)}))
+		people = people.data(categories
+				.filter(function(n) { return  n.category=="People";}))
 			.enter()
 			.append("div")
 			.each(function(d) {
@@ -387,7 +395,66 @@ function($scope,$http, $sce, $routeParams, Data) {
 						}
         			);
         		});
-	
+
+			category = category.data(categories
+				.filter(function(n) { return  n.category!="People";}))
+			.enter()
+			.append("div")
+			.each(function(d) {
+				d3.select(this).append("button")
+					.attr("class", "accordion")
+					.on("click", function(d) {
+        				console.log(this);
+        				this.classList.toggle("active");
+        				this.nextElementSibling.classList.toggle("show");
+        			})
+        			.append("span")
+        			.attr("title",function(d){  return d.category})
+        			.text(function(d){ 
+        				return d.category.slice(0,23)+ (d.category.length>23 ? "..." : "");});
+
+				d3.select(this).append("div")
+					.attr("class", "panel")
+					.attr("id", function(d){  return d.id;})
+					.each(function(d) {
+						var tagDiv = d3.select(this);
+
+						for (var i = 0; i < d.children.length; i++) {
+							tagDiv.append("p")
+								//.style("color", function(d){  return d.children[i].colour })
+								.text(function(d){  return d.children[i].value })
+								.attr("id", function(d){  return d.children[i].key;})
+								.on("mouseover", function (t){
+
+									//TODO: this is a bit of a hacky way, should make direct referance to the objects rather than using the element id
+									var this_tag = this.id.toString();
+
+									//for each link check if the node at BOTH ends contains the tag you're interested in and return the colour
+									link
+										//filter for having tags and apply a thicker stroke to everything afterwards
+										.filter(function(l){ return linkHasTag(l, this_tag) })
+										.classed("link--tagged", true)
+										.each(function() { this.parentNode.appendChild(this); });
+
+									node
+										.filter(function(l){ return nodeHasTag(l, this_tag) })
+										.classed("node--target", true)
+										.classed("node--source", true)
+										.each(function() { 
+											this.parentNode.appendChild(this); });
+								})
+								.on("mouseout", function (d){
+									link.style("stroke", null)
+										.classed("link--tagged", false);
+									node
+										.classed("node--target", false)
+										.classed("node--source", false);
+								});	
+							}
+						}
+        			);
+        		});
+
 		function hasChildrenWithLinks(c){
 			for (var i = 0; i < c.children.length; i++) {
 				if (c.children[i].LinkCount>0){
