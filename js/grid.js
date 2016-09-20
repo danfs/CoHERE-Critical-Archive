@@ -17,7 +17,7 @@ function($scope,$http, $sce, $routeParams, Data) {
 	Data.getDataAsync(function(results) {
 	
 		data = wp_json_to_d3_json(results.posts);
-		if(data.links.length > 3){
+		if(data.links.length > 1){
 			$scope.viewMode = "vis";
 		}
 
