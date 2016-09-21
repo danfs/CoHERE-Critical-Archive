@@ -377,10 +377,20 @@ function($scope,$http, $sce, $routeParams, Data) {
 
 				d3.select(this).append("title")
 					.each(function(d) {
-						var toolTip="";
+						var toolTip="Keywords:";
+						var people = "People:";
+						var outputtype = "Output Type:";
+
 						for (var i = 0; i < d.tags.length; i++) {
-							toolTip += d.tags[i].value+", ";
+							if (d.tags[i].parent.category=="People"){
+								people += " \x0A - "+d.tags[i].value;
+							} else if (d.tags[i].parent.category=="outputType") {
+								outputtype += " \x0A - "+d.tags[i].value;
+							} else {
+								toolTip += " \x0A - "+d.tags[i].value;
+							}
 						}
+						toolTip += "\x0A"+people + "\x0A"+outputtype;
 						d3.select(this).text(toolTip);
 					});
 			})
@@ -444,8 +454,9 @@ function($scope,$http, $sce, $routeParams, Data) {
         			);
         		});
 
-		outputType = outputType.data(categories
-				.filter(function(n) { return  n.category=="Output";}))
+		outputType = outputType
+			.data(categories
+				.filter(function(n) { return  n.category=="outputType";}))
 			.enter()
 			.append("div")
 			.each(function(d) {
@@ -493,7 +504,7 @@ function($scope,$http, $sce, $routeParams, Data) {
         		});
 
 		category = category.data(categories
-				.filter(function(n) { return  n.category!="People" && n.category!="Output";}))
+				.filter(function(n) { return  n.category!="People" && n.category!="outputType";}))
 			.enter()
 			.append("div")
 			.each(function(d) {
