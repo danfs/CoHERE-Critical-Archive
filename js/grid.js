@@ -471,7 +471,7 @@ function($scope,$http, $sce, $routeParams, Data) {
 								//.style("color", function(d){  return d.children[i].colour })
 								.text(function(d){  return d.children[i].value })
 								.attr("id", function(d){  return d.children[i].key;})
-								.attr("class", "people")
+								.attr("class", "output")
 								.on("mouseover", function (t){
 
 									//TODO: this is a bit of a hacky way, should make direct referance to the objects rather than using the element id
@@ -481,22 +481,22 @@ function($scope,$http, $sce, $routeParams, Data) {
 									link
 										//filter for having tags and apply a thicker stroke to everything afterwards
 										.filter(function(l){ return linkHasTag(l, this_tag) })
-										.classed("link-people-tagged", true)
+										.classed("link-output-tagged", true)
 										.each(function() { this.parentNode.appendChild(this); });
 
 									node
 										.filter(function(l){ return nodeHasTag(l, this_tag) })
-										.classed("node-people-target", true)
-										.classed("node-people-source", true)
+										.classed("node-output-target", true)
+										.classed("node-output-source", true)
 										.each(function() { 
 											this.parentNode.appendChild(this); });
 								})
 								.on("mouseout", function (d){
 									link.style("stroke", null)
-										.classed("link-people-tagged", false);
+										.classed("link-output-tagged", false);
 									node
-										.classed("node-people-target", false)
-										.classed("node-people-source", false);
+										.classed("node-output-target", false)
+										.classed("node-output-source", false);
 								});	
 							}
 						}
@@ -581,31 +581,56 @@ function($scope,$http, $sce, $routeParams, Data) {
 
 			//from the example  - turn off all the nodes' flags identifying them as targets or sources for the links
 		  node
-		      .each(function(n) { n.target = n.source = false; });
+		      .each(function(n) { n.target = n.source = n.outputSource = n.outputTarget = n.peopleSource = n.peopleTarget = false; });
 
 
 		  ///I can't work out why l.source.source rather than just l.source
 		  link
-			.classed("link--target", function(l) { if (l.target === d) return l.source.source = true; })
-			.classed("link--source", function(l) { if (l.source === d) return l.target.target = true; })
-		      //below is just to bring the right nodes to the front - filter applies itself on anything further on in the method chain	
-		    .filter(function(l) { return l.target === d || l.source === d; })
-		    ///this.parentNode.appendChild(this) just takes the child off and sticks it back on again bringing it to the front
+			.classed("link-output-target", function(l) { 
+				if (l.target === d && linkHasCat(l,"outputType"))return l.target.outputTarget = l.source.outputSource = true; 
+			})
+			.classed("link-output-source", function(l) { 
+				if (l.source === d && linkHasCat(l,"outputType")) return l.target.outputTarget = l.source.outputSource = true; 
+			})
+			.classed("link-people-target", function(l) { 
+				if (l.target === d && linkHasCat(l,"People"))return l.target.peopleTarget = l.source.peopleSource = true; 
+			})
+			.classed("link-people-source", function(l) { 
+				if (l.source === d && linkHasCat(l,"People")) return l.target.peopleTarget = l.source.peopleSource = true; 
+			})
+			.classed("link--target", function(l) { if (l.target === d && !linkHasCat(l,"outputType") && !linkHasCat(l,"People")) return l.source.source = true; })
+			.classed("link--source", function(l) { if (l.source === d && !linkHasCat(l,"outputType") && !linkHasCat(l,"People")) return l.target.target = true; })
+			 .filter(function(l) { return l.target === d || l.source === d; })
+
+		    //this.parentNode.appendChild(this) just takes the child off and sticks it back on again bringing it to the front
 		      .each(function() { this.parentNode.appendChild(this); });
+			;
 
 		  node
 		      .classed("node--target", function(n) { return n.target; })
-		      .classed("node--source", function(n) { return n.source; });
+		      .classed("node--source", function(n) { return n.source; })
+		      .classed("node-output-target", function(n) { return n.outputTarget; })
+		      .classed("node-output-source", function(n) { return n.outputSource; })
+		      .classed("node-people-target", function(n) { return n.peopleTarget; })
+		      .classed("node-people-source", function(n) { return n.peopleSource; });
 		}
 
 		function mouseouted(d) {
 			link
 				.classed("link--target", false)
-				.classed("link--source", false);
+				.classed("link--source", false)
+				.classed("link-output-target", false)
+				.classed("link-output-source", false)
+				.classed("link-people-target", false)
+				.classed("link-people-source", false);
 
 			node
 				.classed("node--target", false)
 				.classed("node--source", false)
+				.classed("node-output-target", false)
+				.classed("node-output-source", false)
+				.classed("node-people-target", false)
+				.classed("node-people-source", false);
 
 		}
 		
@@ -662,6 +687,24 @@ function($scope,$http, $sce, $routeParams, Data) {
 			if (source && target) has_tag = true;
 	
 			return has_tag;
+		}
+
+		function linkHasCat(link, category){
+			var has_cat = false;
+			//must have tag both end to return true
+			categories.filter(function(n) { return  n.category==category;})
+				.forEach(function(cat){
+					cat.children.forEach(function(tag){
+						var source = nodeHasTag(link.source,tag.key);
+						var target = nodeHasTag(link.target,tag.key);
+
+						if (source && target) {
+							has_cat = true;
+						}
+					});
+				});
+			
+			return has_cat;
 		}
 		function nodeHasTag(node, tag){
 			var has_tag = false;

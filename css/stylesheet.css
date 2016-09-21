@@ -36,7 +36,21 @@
   pointer-events: none;
 }
 
-.link-people-tagged {
+.link-output-tagged, .link-output-target, .link-output-source {
+ /* .style("stroke-width", "2")
+          .style("stroke-opacity", "1")*/
+  stroke: #34D1BF;
+  stroke-opacity: 1;
+  stroke-width: 3px;
+}
+.link-output-untagged {
+ /* .style("stroke-width", "2")
+          .style("stroke-opacity", "1")*/
+  stroke-opacity: 0.4;
+  stroke-width: 1px;
+}
+
+.link-people-tagged, .link-people-target, .link-people-source{
  /* .style("stroke-width", "2")
           .style("stroke-opacity", "1")*/
   stroke: #3454d1;
@@ -67,6 +81,13 @@
 .node-people-source .circle{
   stroke: #3454d1;
 }
+
+.node:hover.node-output-target .circle,
+.node-output-target .circle, 
+.node-output-source .circle{
+  stroke: #34D1BF;
+}
+
 .node:hover .circle,
 .node--target .circle,
 .node--source .circle{
@@ -191,6 +212,10 @@ div.panel p {
 
 div.panel p.people {
   color: #3454d1;
+}
+
+div.panel p.output {
+  color: #34D1BF;
 }
 
 div.panel p:hover {
