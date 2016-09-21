@@ -39,7 +39,7 @@
 .link-people-tagged {
  /* .style("stroke-width", "2")
           .style("stroke-opacity", "1")*/
-  stroke: #002768;
+  stroke: #3454d1;
   stroke-opacity: 1;
   stroke-width: 3px;
 }
@@ -65,7 +65,7 @@
 
 .node-people-target .circle, 
 .node-people-source .circle{
-  stroke: #002768;
+  stroke: #3454d1;
 }
 .node:hover .circle,
 .node--target .circle,
@@ -190,7 +190,7 @@ div.panel p {
 }
 
 div.panel p.people {
-  color: #002768;
+  color: #3454d1;
 }
 
 div.panel p:hover {

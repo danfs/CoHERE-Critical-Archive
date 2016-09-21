@@ -7,7 +7,7 @@ function($scope,$http, $sce, $routeParams, Data) {
 
 	var diameter = 600,
 	radius = diameter / 2,
-	innerRadius = radius - 120;
+	innerRadius = radius - 160;
 
 	$scope.viewMode = "packery";
 	
@@ -64,7 +64,13 @@ function($scope,$http, $sce, $routeParams, Data) {
 		var nodes = {};
 		var links = [];
 		var tags = {};
-		var categories = {};
+		var categories = {
+			"outputType":{
+	 			"id": "outputType",
+	 			"category": "outputType",
+				"children": []
+			}
+		};
 		
 
 		function newNode(post){
@@ -110,8 +116,19 @@ function($scope,$http, $sce, $routeParams, Data) {
 			// 		},
 			// 		...
 
-			var exists = links.find(function( link ) {
-				return link.source === nodes[source] && link.target === nodes[target] && link.tag === tags[tag];
+			var exists = false;
+
+			links.forEach(function( link ) {
+				
+				if (link.target.id == nodes[target.key].id
+					&& link.source.id == nodes[source.key].id
+					&& link.tag.id == tags[tag.key].id){
+					exists = true;
+				}else if (link.target.id == nodes[source.key].id 
+					&& link.source.id == nodes[target.key].id 
+					&& link.tag.id == tags[tag.key].id){
+					exists = true;
+				}
 			});
 
 			if(!exists){
@@ -149,7 +166,6 @@ function($scope,$http, $sce, $routeParams, Data) {
 
 
 		function newTag(postTag){
-
 			// "tags":
 			// 		key:{
 			// 			"tagID": tagID,
@@ -174,8 +190,25 @@ function($scope,$http, $sce, $routeParams, Data) {
 				//add tag to categories
 				categories[postTag.parent+"_id"].children.push(tag);
 			}
-
 			return tags[postTag.slug];
+		}
+
+		function newOutputType(outputtype){
+			if(!(outputtype in tags)){
+				var tag = {};
+					tag.id = outputtype;
+					tag.colour = getRandomColor();
+					tag.LinkCount = 0;
+					tag.value = outputtype;
+					tag.parent = categories["outputType"];
+					tag.key = outputtype;
+
+					tags[outputtype] = tag;
+
+				categories["outputType"].children.push(tag);
+			}
+
+			return tags[outputtype];
 		}
 
 
@@ -184,6 +217,7 @@ function($scope,$http, $sce, $routeParams, Data) {
 			var this_post = wp_json[i];
 
 			var sourceNode = newNode(this_post);
+			var nodeOutputType;
 
 			for (var k = 0; k < this_post.categories.length; k++) {
 				//Get Categories first
@@ -207,16 +241,39 @@ function($scope,$http, $sce, $routeParams, Data) {
 						//don't compare a post with itself
 						if(i!=j){
 							var other_post = wp_json[j];
+
 							for (var l = 0; l < other_post.categories.length; l++) {
 								var this_cat = this_post.categories[k].title.trim().toLowerCase();
 								var that_cat = other_post.categories[l].title.trim().toLowerCase();
 								if(this_cat==that_cat){
-									var targetNode = newNode(other_post);
+									var targetNode = newNode(other_post);//it only add unique nodes
 									if (targetNode.tags.indexOf(tagIndex) == -1) {
 										targetNode.tags.push(tagIndex);
 									}
 									newLink(sourceNode,targetNode,tagIndex);
 								}
+							}
+						}
+					}
+				}
+			}
+
+			//they all should have output types, but just incase
+			if (this_post.custom_fields.hasOwnProperty('output-type')){
+				nodeOutputType = newOutputType(this_post.custom_fields['output-type'][0])
+				sourceNode.tags.push(nodeOutputType);
+				var this_type = this_post.custom_fields['output-type'][0];
+
+				//find matching output types
+				for (var j = 0; j < wp_json.length; j++) {
+					if(i!=j){
+						var other_post = wp_json[j];
+						//check for shared output type
+						if (other_post.custom_fields.hasOwnProperty('output-type')){
+							var other_type = other_post.custom_fields['output-type'][0];
+							if(this_type==other_type){
+								var targetNode = newNode(other_post);//it only add unique nodes
+								newLink(sourceNode,targetNode,nodeOutputType);
 							}
 						}
 					}
@@ -269,6 +326,7 @@ function($scope,$http, $sce, $routeParams, Data) {
 		node = svg.append("g").attr("class","all_nodes").selectAll(".node"),
 		category = d3.select(".tag").selectAll("button"),
 		people = d3.select(".people").selectAll("p");
+		outputType = d3.select(".outputType").selectAll("p");
 
 
 		  ////here's where we link the json with the D3 objects
@@ -337,13 +395,14 @@ function($scope,$http, $sce, $routeParams, Data) {
 			.on("mouseout", mouseouted);
 			
 		
-		people = people.data(categories
-				.filter(function(n) { return  n.category=="People";}))
+		people = people
+			.data(categories
+				.filter(function(n) { return  n.category == "People";}))
 			.enter()
 			.append("div")
 			.each(function(d) {
 				d3.select(this).append("div")
-					.attr("class", "panel")
+					.attr("class", "panel show")
 					.attr("id", function(d){  return d.id;})
 					.each(function(d) {
 						var tagDiv = d3.select(this);
@@ -385,8 +444,56 @@ function($scope,$http, $sce, $routeParams, Data) {
         			);
         		});
 
-			category = category.data(categories
-				.filter(function(n) { return  n.category!="People";}))
+		outputType = outputType.data(categories
+				.filter(function(n) { return  n.category=="Output";}))
+			.enter()
+			.append("div")
+			.each(function(d) {
+				d3.select(this).append("div")
+					.attr("class", "panel show")
+					.attr("id", function(d){  return d.id;})
+					.each(function(d) {
+						var tagDiv = d3.select(this);
+
+						for (var i = 0; i < d.children.length; i++) {
+							tagDiv.append("p")
+								//.style("color", function(d){  return d.children[i].colour })
+								.text(function(d){  return d.children[i].value })
+								.attr("id", function(d){  return d.children[i].key;})
+								.attr("class", "people")
+								.on("mouseover", function (t){
+
+									//TODO: this is a bit of a hacky way, should make direct referance to the objects rather than using the element id
+									var this_tag = this.id.toString();
+
+									//for each link check if the node at BOTH ends contains the tag you're interested in and return the colour
+									link
+										//filter for having tags and apply a thicker stroke to everything afterwards
+										.filter(function(l){ return linkHasTag(l, this_tag) })
+										.classed("link-people-tagged", true)
+										.each(function() { this.parentNode.appendChild(this); });
+
+									node
+										.filter(function(l){ return nodeHasTag(l, this_tag) })
+										.classed("node-people-target", true)
+										.classed("node-people-source", true)
+										.each(function() { 
+											this.parentNode.appendChild(this); });
+								})
+								.on("mouseout", function (d){
+									link.style("stroke", null)
+										.classed("link-people-tagged", false);
+									node
+										.classed("node-people-target", false)
+										.classed("node-people-source", false);
+								});	
+							}
+						}
+        			);
+        		});
+
+		category = category.data(categories
+				.filter(function(n) { return  n.category!="People" && n.category!="Output";}))
 			.enter()
 			.append("div")
 			.each(function(d) {
