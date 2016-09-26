@@ -1,5 +1,6 @@
 h2 {
   font-size: 20px;
+  cursor: pointer;
 }
 .logo {
     float: left;
@@ -36,6 +37,10 @@ h2 {
   stroke-opacity: .4;
   fill: none;
   pointer-events: none;
+}
+
+.people .link {
+  stroke-opacity: 0;
 }
 
 .link-output-tagged, .link-output-target, .link-output-source {
@@ -128,6 +133,10 @@ h2 {
 .tagHolder {
   max-width: 250px;
   float: right;
+}
+.disabledHolder {
+  opacity: 0.3;
+  pointer-events: none;
 }
 
 #vis_container {

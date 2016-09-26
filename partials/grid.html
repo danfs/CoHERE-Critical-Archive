@@ -25,22 +25,31 @@
 <div ng-show="viewMode=='vis'">
 
 	<div class="peoplHolder">
-		<h2 class="stay_inline">People</h2>
-		<div class="stay_inline people">
+		<h2 ng-click="togglePeople()" class="stay_inline">People 
+			<i ng-show="peopleToggle" class="fa fa-eye-slash" aria-hidden="true"></i>
+			<i ng-hide="peopleToggle" class="fa fa-eye" aria-hidden="true"></i>
+		</h2>
+		<div ng-class="{'disabledHolder' : peopleToggle}" class="stay_inline people">
 		</div>
-		<h2 class="stay_inline">Output type</h2>
-		<div class="stay_inline outputType">
+		<h2 ng-click="toggleOutput()" class="stay_inline">Output type 
+			<i ng-show="outputToggle" class="fa fa-eye-slash" aria-hidden="true"></i>
+			<i ng-hide="outputToggle" class="fa fa-eye" aria-hidden="true"></i>
+		</h2>
+		<div ng-class="{'disabledHolder' : outputToggle}" class="stay_inline outputType">
 		</div>
 	</div>
 	
 	<div class="tagHolder">
-		<h2 class="stay_inline">Key words</h2>
-		<div class="stay_inline tag">
+		<h2 ng-click="toggleKeyWord()" class="stay_inline">Key words 
+			<i ng-show="keywordToggle" class="fa fa-eye-slash" aria-hidden="true"></i>
+			<i ng-hide="keywordToggle" class="fa fa-eye" aria-hidden="true"></i>
+		</h2>
+		<div ng-class="{'disabledHolder' : keywordToggle}" class="stay_inline tag">
 		</div>	
 	</div>
 
 
-	<div id="vis_container"></div>
+	<div id="vis_container" ng-class="visClass"></div>
 
 	<!--form>
 	  <label><input type="radio" name="mode" value="date1">2015-12-16 10:38:50</label>

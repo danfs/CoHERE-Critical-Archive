@@ -1,8 +1,9 @@
 
-<h1>Output: {{project.title}} </h1>
+<h1>{{project.title}} </h1>
 <!-- we'll need to work out how to get the authro in there given that all outputs will be entered by thereza -->
-<h2>Author: {{project.author.name}}</h2>
-<span class="stay_inline" ng-repeat = "i in project.categories"> {{ i.title}} </span>
+<!-- <h2>Author: {{project.author.name}}</h2> -->
 <p id="content">{{content}}</p>
 <img ng-src="{{project.attachments[0].url}}" alt="no image"/>
+<span class="stay_inline" ng-repeat = "i in project.categories"> {{ i.title}} </span>
+
 

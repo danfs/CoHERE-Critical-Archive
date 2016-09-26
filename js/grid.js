@@ -4,14 +4,12 @@ angControllers.controller('GridCtrl', ['$scope', '$http', '$sce','$routeParams',
 	
 function($scope,$http, $sce, $routeParams, Data) {
 
-
 	var diameter = 600,
 	radius = diameter / 2,
 	innerRadius = radius - 160;
 
 	$scope.viewMode = "packery";
 	
-
 	var cluster,bundle,line,svg,link,node,tag,data,filteredData;
 
 	Data.getDataAsync(function(results) {
@@ -31,6 +29,9 @@ function($scope,$http, $sce, $routeParams, Data) {
 		makePackeryGrid(results.posts);
 		makeGraph();
 	});
+
+
+
 	function makePackeryGrid(data){
 		var dimensions = [200,200,400,400];
 
@@ -341,7 +342,9 @@ function($scope,$http, $sce, $routeParams, Data) {
 			.enter()
 			.append("path")
 			.each(function(d) { d.source = d[0], d.target = d[d.length - 1]; })
-			.attr("class", "link")
+			.attr("class", function(d) {
+					return getLinkCat(d)+"link";
+				})
 			.attr("stroke-width", function(d) {return getLineThickness(d.source,d.target)})
 			.attr("d", line);
 
@@ -706,6 +709,23 @@ function($scope,$http, $sce, $routeParams, Data) {
 			
 			return has_cat;
 		}
+
+		function getLinkCat(link){
+			var catList = "";
+			var keywordAdded= false;
+			link.source.tags.forEach(function(tag){
+					if (nodeHasTag(link.target,tag.key)){
+						if (tag.parent.category == "People" || tag.parent.category == "outputType"){
+							catList += tag.parent.category+" ";
+						}else if (!keywordAdded){
+							catList += "Keyword ";
+						}
+					}
+				});
+			
+			return catList;
+		}
+
 		function nodeHasTag(node, tag){
 			var has_tag = false;
 			node.tags.forEach(function(n){
@@ -743,17 +763,54 @@ function($scope,$http, $sce, $routeParams, Data) {
 				}
 			}
 
-			for(var i = data.links.length -1; i >= 0 ; i--){
-				if(data.links[i].source.date>date && data.links[i].target.date>date){
+			for(var j = data.links.length -1; j >= 0 ; j--){
+				if(data.links[j].source.date>date && data.links[j].target.date>date){
 					data.links.splice(n, 1);
 				}
 			}
 
 			return data;
 		}
-
+		
 		///dunno what this is for -matching diameter of svg to height of screen? 
 		d3.select(self.frameElement).style("height", diameter + "px");
 
 	}
+	
+	$scope.visClass = "test";
+	$scope.peopleToggle = false;
+    $scope.togglePeople = function() {
+        $scope.peopleToggle = $scope.peopleToggle === false ? true: false;  
+        toggleLinkVisability();
+    };
+
+    $scope.outputToggle = false;
+    $scope.toggleOutput = function() {
+        $scope.outputToggle = $scope.outputToggle === false ? true: false;
+        toggleLinkVisability();
+    };
+
+    $scope.keywordToggle = false;
+    $scope.toggleKeyWord = function() {
+        $scope.keywordToggle = $scope.keywordToggle === false ? true: false;
+        toggleLinkVisability();
+    };
+
+    function toggleLinkVisability (){
+    	var allLinks = document.getElementsByClassName("link");
+    	
+		for (var e = 0; e < allLinks.length; e++) {
+			var classList = allLinks[e].className.baseVal;
+			if ((classList.indexOf('People') !== -1 && !$scope.peopleToggle)||(classList.indexOf('outputType') !== -1 && !$scope.outputToggle)||(classList.indexOf('Keyword') !== -1 && !$scope.keywordToggle)){
+				allLinks[e].style.opacity = 0.4;
+				
+			} else {
+				allLinks[e].style.opacity = 0;
+			}
+	    }
+	}
+
+	// document.getElementById("showPeople").onclick = function() {
+	// 	this.
+	// };
 }]);
