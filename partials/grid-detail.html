@@ -1,9 +1,50 @@
 
-<h1>{{project.title}} </h1>
-<!-- we'll need to work out how to get the authro in there given that all outputs will be entered by thereza -->
-<!-- <h2>Author: {{project.author.name}}</h2> -->
-<p id="content">{{content}}</p>
-<img ng-src="{{project.attachments[0].url}}" alt="no image"/>
-<span class="stay_inline" ng-repeat = "i in project.categories"> {{ i.title}} </span>
+<div style="height:100px">
+	<div class="logo"><img src="images/logo.png" style="width: 80px;"></div>
+	<div class="cntls">
+		<h1>Critical Archive </h1>
+	</div>
+</div>
+<div style="margin:0 20px">
+	<h1>{{project.title}} </h1>
+	<!-- we'll need to work out how to get the authro in there given that all outputs will be entered by thereza -->
+	<!-- <h2>Author: {{project.author.name}}</h2> -->
+	<p ng-bind-html="renderHtml(project.content)"></p>
+
+	<br>
+
+	<!-- <span class="stay_inline" ng-repeat = "i in project.categories"> {{ i.title}} - {{ i.value}}</span>
+	People: -->
+	<div class="row">
+		<div class="col-xs-6">
+			<ul>
+				<h2>Work Package:</h2>
+				{{project.custom_fields.wp[0]}}
+			</ul>
+			<ul>
+			    <li ng-repeat="cat in categories" ng-if="cat.category=='People'" style="display: block;"> 
+			    	<h2>{{cat.category}}:</h2>
+			        <ul>
+			            <li ng-repeat="tag in cat.children" style="display: block; margin-left: -40px;">{{tag.value}}</li>
+			        </ul>
+			    </li>
+			</ul>
+		</div>
+
+		<div class="col-xs-6">
+			<ul>
+				<h2>Key Words:</h2>
+			    <li ng-repeat="cat in categories" ng-if="cat.category!='People'" style="display: block;"> 
+			    	<b>{{cat.category}}</b> :
+			        <ul>
+			            <li ng-repeat="tag in cat.children" style="display: block;">{{tag.value}}</li>
+			        </ul>
+			    </li>
+			</ul>	
+		</div>
+	</div>	
+</div>
+
+
 
 
