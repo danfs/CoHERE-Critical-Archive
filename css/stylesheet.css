@@ -34,7 +34,7 @@ h2 {
 
 .link {
   stroke: #666666;
-  stroke-opacity: .4;
+  stroke-opacity: .5;
   fill: none;
   pointer-events: none;
 }
@@ -53,7 +53,7 @@ h2 {
 .link-output-untagged {
  /* .style("stroke-width", "2")
           .style("stroke-opacity", "1")*/
-  stroke-opacity: 0.4;
+  stroke-opacity: 0.5;
   stroke-width: 1px;
 }
 
@@ -67,7 +67,7 @@ h2 {
 .link-people-untagged {
  /* .style("stroke-width", "2")
           .style("stroke-opacity", "1")*/
-  stroke-opacity: 0.4;
+  stroke-opacity: 0.5;
   stroke-width: 1px;
 }
 .link--tagged {
@@ -80,7 +80,7 @@ h2 {
 .link--untagged {
  /* .style("stroke-width", "2")
           .style("stroke-opacity", "1")*/
-  stroke-opacity: 0.4;
+  stroke-opacity: 0.5;
   stroke-width: 1px;
 }
 
@@ -89,25 +89,22 @@ h2 {
   stroke: #3454d1;
 }
 
-.node:hover.node-output-target .circle,
 .node-output-target .circle, 
 .node-output-source .circle{
   stroke: #34D1BF;
 }
 
-.node:hover .circle,
 .node--target .circle,
 .node--source .circle{
   stroke: #d62728;
 }
 
-.node--source, .node-people-source  {
+.node--source, .node--target,
+.node-people-source, .node-people-target,
+.node-output-source, .node-output-target   {
   fill: #000;
 }
 
-.node--target {
-  //fill: rgba(140,140,140,1);
-}
 
 .link--source,
 .link--target {

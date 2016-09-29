@@ -601,21 +601,35 @@ function($scope,$http, $sce, $routeParams, Data) {
 			.classed("link-people-source", function(l) { 
 				if (l.source === d && linkHasCat(l,"People")) return l.target.peopleTarget = l.source.peopleSource = true; 
 			})
-			.classed("link--target", function(l) { if (l.target === d && !linkHasCat(l,"outputType") && !linkHasCat(l,"People")) return l.source.source = true; })
-			.classed("link--source", function(l) { if (l.source === d && !linkHasCat(l,"outputType") && !linkHasCat(l,"People")) return l.target.target = true; })
+			.classed("link--target", function(l) { 
+				if (l.target === d && !linkHasCat(l,"outputType") && !linkHasCat(l,"People")) 
+					return l.target.target = l.source.source = true; 
+			})
+			.classed("link--source", function(l) { 
+				if (l.source === d && !linkHasCat(l,"outputType") && !linkHasCat(l,"People")) 
+					return l.target.target = l.source.source = true; 
+			})
 			 .filter(function(l) { return l.target === d || l.source === d; })
 
 		    //this.parentNode.appendChild(this) just takes the child off and sticks it back on again bringing it to the front
 		      .each(function() { this.parentNode.appendChild(this); });
-			;
 
 		  node
-		      .classed("node--target", function(n) { return n.target; })
-		      .classed("node--source", function(n) { return n.source; })
-		      .classed("node-output-target", function(n) { return n.outputTarget; })
-		      .classed("node-output-source", function(n) { return n.outputSource; })
-		      .classed("node-people-target", function(n) { return n.peopleTarget; })
-		      .classed("node-people-source", function(n) { return n.peopleSource; });
+		      .classed("node--target node--soure", function(n) { 
+		      	if (!$scope.keywordToggle && (n.target || n.source)) return true; 
+		      })
+		      .classed("node-output-target", function(n) { 
+		      	if(!$scope.outputToggle) return n.outputTarget; 
+		      })
+		      .classed("node-output-source", function(n) { 
+		      	if(!$scope.outputToggle) return n.outputSource; 
+		      })
+		      .classed("node-people-target", function(n) { 
+		      	if(!$scope.peopleToggle) return n.peopleTarget; 
+		      })
+		      .classed("node-people-source", function(n) { 
+		      	if(!$scope.peopleToggle) return n.peopleSource; 
+		      });
 		}
 
 		function mouseouted(d) {
@@ -802,7 +816,7 @@ function($scope,$http, $sce, $routeParams, Data) {
 		for (var e = 0; e < allLinks.length; e++) {
 			var classList = allLinks[e].className.baseVal;
 			if ((classList.indexOf('People') !== -1 && !$scope.peopleToggle)||(classList.indexOf('outputType') !== -1 && !$scope.outputToggle)||(classList.indexOf('Keyword') !== -1 && !$scope.keywordToggle)){
-				allLinks[e].style.opacity = 0.4;
+				allLinks[e].style.opacity = 0.5;
 				
 			} else {
 				allLinks[e].style.opacity = 0;
