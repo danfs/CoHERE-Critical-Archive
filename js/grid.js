@@ -153,7 +153,7 @@ function($scope,$http, $sce, $routeParams, Data) {
 			if(!(postCategory.id+"_id" in categories)){
 				var category = {};
 				category.id = postCategory.id+"_id";
-				if (this_post.categories[k].title == "People"){
+				if (postCategory.title == "People"){
 					category.category = postCategory.title
 				}else{
 					category.category = postCategory.title.slice(4);
@@ -162,7 +162,6 @@ function($scope,$http, $sce, $routeParams, Data) {
 
 				categories[postCategory.id+"_id"] = category;
 			}
-
 		}
 
 
@@ -574,8 +573,9 @@ function($scope,$http, $sce, $routeParams, Data) {
 			return false;
 		}
 
-		function clicked(d){			
-			window.location.href = '#/grid/'+d.id;
+		function clicked(d){	
+			 window.location.href = '#/grid/'+d.id;
+
 		}
 
 		function mouseovered(d) {
