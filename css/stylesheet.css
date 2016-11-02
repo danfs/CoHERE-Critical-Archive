@@ -2,6 +2,12 @@ h2 {
   font-size: 20px;
   cursor: pointer;
 }
+
+img{
+  width: auto;
+  height: auto;
+}
+
 .logo {
     float: left;
     margin-right: 20px;
@@ -19,7 +25,6 @@ h2 {
 	position: relative;
 	/*border: 2px solid;
 	background-color: #E5E5E5 !important;*/
-	
 }
 
 .node {
