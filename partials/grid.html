@@ -61,7 +61,7 @@
 <div ng-show="viewMode=='packery'">
 	
 	<packery ng-init="getStuff()" row-height=".card.single" column-width=".card.single" handle=".card-header" draggable="true" percentPosition="true" is-origin-top="true" gutter="20">
-	    <packery-object ng-repeat="i in gridData" ng-style="{'width':i.width,'height':i.height,'background-image': i.url   }" class="card single project" style="overflow:hidden">
+	    <packery-object ng-repeat="i in gridData" ng-style="{'width':i.width,'height':i.height,'background-image': i.url   }" class="card single project" style="overflow:hidden; background-size: cover; background-position: center; ">
 	       <a href="#/grid/{{i.id}}">{{i.title}}</a>
 	    </packery-object>
 	    

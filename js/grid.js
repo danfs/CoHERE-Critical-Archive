@@ -4,6 +4,7 @@ angControllers.controller('GridCtrl', ['$scope', '$http', '$sce','$routeParams',
 	
 function($scope,$http, $sce, $routeParams, Data) {
 
+	var height = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
 	var diameter = Math.min(document.getElementById("vis_container").offsetWidth,(height-100));
 	var radius = diameter / 2,
 	innerRadius = radius - 160;
@@ -40,8 +41,13 @@ function($scope,$http, $sce, $routeParams, Data) {
 		for (var i = 0; i < $scope.gridData.length; i++) {
 	    	$scope.gridData[i].width=dimensions[getRandomInt(1,3)];
 	    	$scope.gridData[i].height=dimensions[getRandomInt(1,3)];
-	    	if($scope.gridData[i].attachments[0])$scope.gridData[i].url = "url("+$scope.gridData[i].attachments[0].url +")";
+	    	for (var j = 0; j < $scope.gridData[i].attachments.length; j++) {
+	    		if ($scope.gridData[i].attachments[j].mime_type=="image/jpeg"){
+	    			$scope.gridData[i].url = "url("+$scope.gridData[i].attachments[j].url +")";
+	    		}
+	    	}
 	    	
+	    	console.log($scope.gridData[i].url);
 	    	
 		};
 
