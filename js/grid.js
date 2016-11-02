@@ -386,9 +386,9 @@ function($scope,$http, $sce, $routeParams, Data) {
 						for (var i = 0; i < d.tags.length; i++) {
 							if (d.tags[i].parent.category=="People"){
 								people += " \x0A - "+d.tags[i].value;
-							} else if (d.tags[i].parent.category=="outputType") {
+							} else if (d.tags[i].parent.category=="outputType" && d.tags[i].value!="*none*") {
 								outputtype += " \x0A - "+d.tags[i].value;
-							} else {
+							} else if (d.tags[i].value!="*none*"){
 								toolTip += " \x0A - "+d.tags[i].value;
 							}
 						}
@@ -469,37 +469,40 @@ function($scope,$http, $sce, $routeParams, Data) {
 						var tagDiv = d3.select(this);
 
 						for (var i = 0; i < d.children.length; i++) {
-							tagDiv.append("p")
-								//.style("color", function(d){  return d.children[i].colour })
-								.text(function(d){  return d.children[i].value })
-								.attr("id", function(d){  return d.children[i].key;})
-								.attr("class", "output")
-								.on("mouseover", function (t){
+							//dont add *none*
+							if (d.children[i].value!="*none*"){
+								tagDiv.append("p")
+									//.style("color", function(d){  return d.children[i].colour })
+									.text(function(d){  return d.children[i].value })
+									.attr("id", function(d){  return d.children[i].key;})
+									.attr("class", "output")
+									.on("mouseover", function (t){
 
-									//TODO: this is a bit of a hacky way, should make direct referance to the objects rather than using the element id
-									var this_tag = this.id.toString();
+										//TODO: this is a bit of a hacky way, should make direct referance to the objects rather than using the element id
+										var this_tag = this.id.toString();
 
-									//for each link check if the node at BOTH ends contains the tag you're interested in and return the colour
-									link
-										//filter for having tags and apply a thicker stroke to everything afterwards
-										.filter(function(l){ return linkHasTag(l, this_tag) })
-										.classed("link-output-tagged", true)
-										.each(function() { this.parentNode.appendChild(this); });
+										//for each link check if the node at BOTH ends contains the tag you're interested in and return the colour
+										link
+											//filter for having tags and apply a thicker stroke to everything afterwards
+											.filter(function(l){ return linkHasTag(l, this_tag) })
+											.classed("link-output-tagged", true)
+											.each(function() { this.parentNode.appendChild(this); });
 
-									node
-										.filter(function(l){ return nodeHasTag(l, this_tag) })
-										.classed("node-output-target", true)
-										.classed("node-output-source", true)
-										.each(function() { 
-											this.parentNode.appendChild(this); });
-								})
-								.on("mouseout", function (d){
-									link.style("stroke", null)
-										.classed("link-output-tagged", false);
-									node
-										.classed("node-output-target", false)
-										.classed("node-output-source", false);
-								});	
+										node
+											.filter(function(l){ return nodeHasTag(l, this_tag) })
+											.classed("node-output-target", true)
+											.classed("node-output-source", true)
+											.each(function() { 
+												this.parentNode.appendChild(this); });
+									})
+									.on("mouseout", function (d){
+										link.style("stroke", null)
+											.classed("link-output-tagged", false);
+										node
+											.classed("node-output-target", false)
+											.classed("node-output-source", false);
+									});	
+								}
 							}
 						}
         			);
