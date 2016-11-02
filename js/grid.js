@@ -4,8 +4,8 @@ angControllers.controller('GridCtrl', ['$scope', '$http', '$sce','$routeParams',
 	
 function($scope,$http, $sce, $routeParams, Data) {
 
-	var diameter = 600,
-	radius = diameter / 2,
+	var diameter = Math.min(document.getElementById("vis_container").offsetWidth,(height-100));
+	var radius = diameter / 2,
 	innerRadius = radius - 160;
 
 	$scope.viewMode = "packery";
