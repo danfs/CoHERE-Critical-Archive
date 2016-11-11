@@ -13,10 +13,26 @@ function($scope,$http, $sce, $routeParams, Data) {
 	
 	var cluster,bundle,line,svg,link,node,tag,data,filteredData;
 
+	var ie = (function(){
+
+	    var v = 3,
+		    div = document.createElement('div'),
+		    all = div.getElementsByTagName('i');
+
+		while (
+		    div.innerHTML = '<!--[if gt IE ' + (++v) + ']><i></i><![endif]-->',
+		    all[0]
+		);
+
+		return v > 4 ? v : 10;
+	}());
+
+	alert(ie);
+
 	Data.getDataAsync(function(results) {
 	
 		data = wp_json_to_d3_json(results.posts);
-		if(data.links.length > 1){
+		if(data.links.length > 1 && ie>8){
 			$scope.viewMode = "vis";
 		}
 
