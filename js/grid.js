@@ -27,8 +27,6 @@ function($scope,$http, $sce, $routeParams, Data) {
 		return v > 4 ? v : 10;
 	}());
 
-	alert(ie);
-
 	Data.getDataAsync(function(results) {
 	
 		data = wp_json_to_d3_json(results.posts);
